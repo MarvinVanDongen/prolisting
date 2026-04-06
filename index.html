@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ListingPro — bol.com optimizer</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#ffffff;--bg2:#f7f6f3;--bg3:#eeede8;
+  --text:#1a1a18;--text2:#5c5b56;--text3:#9c9a92;
+  --border:rgba(0,0,0,0.1);--border2:rgba(0,0,0,0.2);
+  --green:#0F6E56;--green-bg:#E1F5EE;--green-text:#085041;
+  --amber:#854F0B;--amber-bg:#FAEEDA;--amber-text:#633806;
+  --red:#A32D2D;--red-bg:#FCEBEB;--red-text:#791F1F;
+  --blue-bg:#E6F1FB;--blue-text:#0C447C;
+  --purple-bg:#EEEDFE;--purple-text:#3C3489;
+  --radius:10px;--radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#1c1c1a;--bg2:#252522;--bg3:#2e2e2b;
+  --text:#e8e6de;--text2:#a8a69e;--text3:#6e6c66;
+  --border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.2);
+  --green:#5DCAA5;--green-bg:#042820;--green-text:#9FE1CB;
+  --amber:#EF9F27;--amber-bg:#2a1e06;--amber-text:#FAC775;
+  --red:#F09595;--red-bg:#2a0e0e;--red-text:#F7C1C1;
+  --blue-bg:#0c2840;--blue-text:#B5D4F4;
+  --purple-bg:#1a1940;--purple-text:#AFA9EC;
+}}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.6}
+header{border-bottom:0.5px solid var(--border);padding:12px 24px;display:flex;align-items:center;gap:10px;min-height:52px}
+.logo{width:26px;height:26px;background:var(--text);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo svg{width:14px;height:14px;fill:var(--bg)}
+.logo-text{font-size:15px;font-weight:500}
+.logo-tag{font-size:12px;color:var(--text3);margin-left:4px}
+#user-info{margin-left:auto;display:none;align-items:center;gap:10px;flex-wrap:wrap}
+.usage-pill{font-size:12px;padding:3px 10px;border-radius:20px;font-weight:500;background:var(--bg2);color:var(--text2);border:0.5px solid var(--border)}
+.usage-pill.low{background:var(--amber-bg);color:var(--amber-text)}
+.usage-pill.pro{background:var(--green-bg);color:var(--green-text)}
+#user-email-display{font-size:12px;color:var(--text3)}
+
+/* Auth & verify screens */
+.fullscreen{display:none;min-height:calc(100vh - 52px);align-items:center;justify-content:center;padding:24px}
+.auth-box{width:100%;max-width:400px}
+.auth-logo{text-align:center;margin-bottom:28px}
+.auth-logo .logo{margin:0 auto 10px;width:36px;height:36px}
+.auth-logo .logo svg{width:18px;height:18px}
+.auth-logo-text{font-size:18px;font-weight:500;margin-bottom:3px}
+.auth-logo-sub{font-size:13px;color:var(--text2)}
+.auth-tabs{display:grid;grid-template-columns:1fr 1fr;border:0.5px solid var(--border2);border-radius:var(--radius);overflow:hidden;margin-bottom:20px}
+.auth-tab{background:var(--bg2);border:none;padding:10px;font-size:13px;font-weight:500;cursor:pointer;color:var(--text2);font-family:inherit;transition:all .15s}
+.auth-tab.active{background:var(--bg);color:var(--text)}
+.auth-card{background:var(--bg);border:0.5px solid var(--border2);border-radius:var(--radius-lg);padding:24px}
+.auth-free-badge{background:var(--green-bg);color:var(--green-text);border-radius:var(--radius);padding:10px 14px;font-size:13px;margin-bottom:16px;line-height:1.4}
+.auth-free-badge strong{display:block;margin-bottom:2px}
+.auth-field{margin-bottom:14px}
+label{display:block;font-size:12px;font-weight:500;color:var(--text2);margin-bottom:6px}
+.auth-field input{width:100%;background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);padding:10px 13px;font-size:13px;color:var(--text);font-family:inherit;outline:none;transition:border-color .15s}
+.auth-field input:focus{border-color:var(--border2)}
+.auth-field-last{margin-bottom:20px}
+.auth-error{background:var(--red-bg);color:var(--red-text);border-radius:var(--radius);padding:10px 13px;font-size:13px;margin-bottom:14px;display:none}
+.auth-success{background:var(--green-bg);color:var(--green-text);border-radius:var(--radius);padding:10px 13px;font-size:13px;margin-bottom:14px;display:none}
+.auth-switch{text-align:center;margin-top:14px;font-size:13px;color:var(--text2)}
+.auth-switch a{color:var(--text);text-decoration:underline;cursor:pointer}
+
+/* Verify screen */
+.verify-icon{width:56px;height:56px;background:var(--blue-bg);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:24px}
+.verify-email-address{font-weight:500;color:var(--text)}
+.resend-link{background:none;border:none;color:var(--text);text-decoration:underline;cursor:pointer;font-size:13px;font-family:inherit;padding:0}
+.resend-link:disabled{color:var(--text3);text-decoration:none;cursor:not-allowed}
+
+/* Upgrade modal */
+#upgrade-modal{display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;padding:24px}
+.upgrade-box{background:var(--bg);border-radius:var(--radius-lg);padding:28px;max-width:540px;width:100%;position:relative}
+.upgrade-close{position:absolute;top:16px;right:16px;background:none;border:none;cursor:pointer;color:var(--text3);font-size:18px;line-height:1}
+.upgrade-box h2{font-size:20px;font-weight:500;margin-bottom:6px}
+.upgrade-intro{font-size:13px;color:var(--text2);margin-bottom:24px;line-height:1.5}
+.plan-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.plan-card{border:0.5px solid var(--border2);border-radius:var(--radius-lg);padding:20px;position:relative}
+.plan-card.featured{border-color:var(--text);border-width:1.5px}
+.plan-badge{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;white-space:nowrap}
+.plan-name{font-size:13px;font-weight:500;color:var(--text2);margin-bottom:6px}
+.plan-price{font-size:28px;font-weight:500;margin-bottom:2px}
+.plan-price span{font-size:14px;font-weight:400;color:var(--text2)}
+.plan-limit{font-size:12px;color:var(--text2);margin-bottom:16px;line-height:1.5}
+.plan-btn{width:100%;background:var(--text);color:var(--bg);border:none;border-radius:var(--radius);padding:10px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:opacity .15s}
+.plan-btn:hover{opacity:.85}
+.plan-btn.outline{background:none;color:var(--text);border:0.5px solid var(--border2)}
+.plan-btn.outline:hover{background:var(--bg2)}
+
+/* Main layout */
+main{padding:40px 24px 80px}
+.layout{max-width:1060px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) 240px;gap:24px;align-items:flex-start}
+h1{font-size:22px;font-weight:500;margin-bottom:5px}
+.sub{font-size:14px;color:var(--text2);margin-bottom:28px}
+.mode-picker{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
+.mode-card{border:0.5px solid var(--border2);border-radius:var(--radius-lg);padding:18px 20px;cursor:pointer;transition:all .15s;background:var(--bg)}
+.mode-card:hover{background:var(--bg2)}
+.mode-card.active{border-color:var(--text);border-width:1.5px}
+.mode-icon{font-size:18px;margin-bottom:8px;line-height:1}
+.mode-title{font-size:14px;font-weight:500;margin-bottom:3px}
+.mode-desc{font-size:12px;color:var(--text2);line-height:1.4}
+.new-badge{font-size:10px;font-weight:500;background:var(--purple-bg);color:var(--purple-text);border-radius:20px;padding:2px 7px}
+.card{background:var(--bg);border:0.5px solid var(--border2);border-radius:var(--radius-lg);padding:22px;margin-bottom:14px}
+input[type=text],input[type=email],input[type=password],textarea{width:100%;background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);padding:10px 13px;font-size:13px;color:var(--text);font-family:inherit;resize:vertical;outline:none;transition:border-color .15s}
+input[type=text]:focus,input[type=email]:focus,input[type=password]:focus,textarea:focus{border-color:var(--border2)}
+textarea{min-height:85px}
+input.over-limit{border-color:var(--red)!important}
+.hint{font-size:11px;color:var(--text3);margin-top:4px}
+.hint.warn{color:var(--red);font-weight:500}
+.fg{margin-bottom:18px}
+.fg:last-child{margin-bottom:0}
+.upload-zone{border:1px dashed var(--border2);border-radius:var(--radius-lg);padding:32px 20px;text-align:center;cursor:pointer;transition:all .15s;background:var(--bg2);position:relative}
+.upload-zone:hover,.upload-zone.dragover{border-color:var(--text);background:var(--bg3)}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-icon{width:36px;height:36px;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;margin:0 auto 10px}
+.upload-icon svg{width:18px;height:18px;stroke:var(--text2);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.upload-title{font-size:14px;font-weight:500;margin-bottom:3px}
+.upload-sub{font-size:12px;color:var(--text2)}
+.file-selected{background:var(--green-bg);border-color:var(--green);border-style:solid}
+.file-selected .upload-title{color:var(--green-text)}
+.file-selected .upload-sub{color:var(--green-text);opacity:.7}
+.pdf-hint{background:var(--purple-bg);color:var(--purple-text);border-radius:var(--radius);padding:12px 14px;font-size:13px;line-height:1.5;margin-bottom:14px}
+.btn{background:var(--text);color:var(--bg);border:none;border-radius:var(--radius);padding:11px 26px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:8px;transition:opacity .15s}
+.btn:hover{opacity:.85}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-ghost{background:none;border:0.5px solid var(--border2);border-radius:var(--radius);padding:9px 20px;font-size:13px;color:var(--text2);cursor:pointer;font-family:inherit}
+.btn-ghost:hover{background:var(--bg2)}
+.btn-sm{padding:6px 14px;font-size:12px}
+.btn-copy{background:var(--bg2);color:var(--text2);border:0.5px solid var(--border);border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit;transition:all .15s}
+.btn-copy:hover{background:var(--bg3)}
+.btn-copy.ok{color:var(--green);border-color:var(--green)}
+.err{background:var(--red-bg);color:var(--red-text);border-radius:var(--radius);padding:12px 14px;font-size:13px;margin-top:12px;display:none}
+#loading{display:none;margin:28px 0}
+.slbl{font-size:11px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
+.steps{list-style:none}
+.step{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:0.5px solid var(--border);font-size:13px;color:var(--text3);transition:color .3s}
+.step.active{color:var(--text)}.step.done{color:var(--green)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--border2);flex-shrink:0;transition:background .3s}
+.step.active .dot{background:#378ADD;box-shadow:0 0 0 3px rgba(55,138,221,0.2)}
+.step.done .dot{background:var(--green)}
+#results{display:none}
+.overall{background:var(--blue-bg);color:var(--blue-text);border-radius:var(--radius);padding:13px 15px;font-size:13px;line-height:1.5;margin-bottom:22px}
+.scores{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:10px}
+.sc{background:var(--bg2);border-radius:var(--radius);padding:14px}
+.sc-lbl{font-size:11px;font-weight:500;color:var(--text2);margin-bottom:6px}
+.sc-num{font-size:30px;font-weight:500;line-height:1;margin-bottom:6px}
+.sc-bar{height:3px;background:var(--border);border-radius:2px;margin-bottom:7px;overflow:hidden}
+.sc-fill{height:100%;border-radius:2px;width:0%;transition:width .9s ease}
+.sc-rsn{font-size:11px;color:var(--text2);line-height:1.4}
+.high .sc-num{color:var(--green)}.high .sc-fill{background:var(--green)}
+.mid .sc-num{color:var(--amber)}.mid .sc-fill{background:var(--amber)}
+.low .sc-num{color:var(--red)}.low .sc-fill{background:var(--red)}
+.score-avg{font-size:13px;color:var(--text2);margin-bottom:20px;margin-top:8px}
+.score-avg strong{color:var(--text)}
+.divider{height:0.5px;background:var(--border);margin:20px 0}
+.pcard{border:0.5px solid var(--border);border-radius:var(--radius);padding:13px 15px;margin-bottom:8px;display:flex;gap:12px}
+.pnum{font-size:12px;font-weight:500;color:var(--text3);min-width:18px;padding-top:1px}
+.ptitle{font-size:13px;font-weight:500;margin-bottom:3px}
+.preason{font-size:12px;color:var(--text2);line-height:1.4}
+.ptag{font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;display:inline-block;margin-top:6px}
+.tag-now{background:var(--green-bg);color:var(--green-text)}
+.tag-later{background:var(--amber-bg);color:var(--amber-text)}
+.ofield{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden}
+.ofhdr{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:0.5px solid var(--border);background:var(--bg);gap:8px;flex-wrap:wrap}
+.ofhdr-l{display:flex;align-items:center;gap:8px}
+.ofhdr-r{display:flex;align-items:center;gap:6px}
+.oflbl{font-size:11px;font-weight:500;color:var(--text2)}
+.ofbody{padding:11px 13px;font-size:13px;line-height:1.6;white-space:pre-wrap;color:var(--text)}
+.ph{background:var(--amber-bg);color:var(--amber-text);border-radius:4px;padding:1px 5px;font-size:11px;font-family:monospace}
+.ba-wrap{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden}
+.ba-hdr{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:0.5px solid var(--border);background:var(--bg);gap:8px;flex-wrap:wrap}
+.ba-hdr-l{display:flex;align-items:center;gap:8px}
+.ba-hdr-r{display:flex;align-items:center;gap:6px}
+.ba-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.ba-col{padding:11px 13px}
+.ba-col:first-child{border-right:0.5px solid var(--border)}
+.ba-lbl{font-size:10px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-bottom:5px}
+.ba-txt{font-size:13px;line-height:1.45;color:var(--text2)}
+.ba-txt.new{color:var(--text)}
+.char-pill{font-size:11px;padding:2px 7px;border-radius:20px;font-weight:500}
+.char-ok{background:var(--green-bg);color:var(--green-text)}
+.char-warn{background:var(--red-bg);color:var(--red-text)}
+.spec-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:10px;align-items:center;padding:8px 0;border-bottom:0.5px solid var(--border)}
+.kwgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;margin-bottom:24px}
+.kwlbl{font-size:11px;font-weight:500;color:var(--text2);margin-bottom:8px}
+.kw{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;margin:2px 3px 2px 0}
+.kw-p{background:var(--green-bg);color:var(--green-text)}
+.kw-m{background:var(--bg2);color:var(--text2);border:0.5px solid var(--border2)}
+.fb-btn{background:none;border:0.5px solid var(--border);border-radius:6px;padding:2px 7px;font-size:13px;cursor:pointer;color:var(--text3);line-height:1.2;transition:all .15s}
+.fb-btn:hover{background:var(--bg3)}
+.fb-btn.up{background:var(--green-bg);border-color:var(--green);color:var(--green)}
+.fb-btn.dn{background:var(--red-bg);border-color:var(--red);color:var(--red)}
+.history-panel{border:0.5px solid var(--border2);border-radius:var(--radius-lg);overflow:hidden;position:sticky;top:24px}
+.history-header{padding:12px 14px;border-bottom:0.5px solid var(--border)}
+.history-title{font-size:12px;font-weight:500;color:var(--text2)}
+.history-empty{padding:20px 14px;font-size:12px;color:var(--text3);text-align:center;line-height:1.5}
+.history-item{padding:11px 14px;border-bottom:0.5px solid var(--border);cursor:pointer;transition:background .15s}
+.history-item:last-child{border-bottom:none}
+.history-item:hover{background:var(--bg2)}
+.history-item-name{font-size:13px;font-weight:500;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.history-item-meta{font-size:11px;color:var(--text3);display:flex;align-items:center;gap:6px}
+.history-score{font-size:11px;font-weight:500;padding:1px 6px;border-radius:20px}
+.history-del{background:none;border:none;cursor:pointer;color:var(--text3);font-size:13px;padding:0 2px;line-height:1;margin-left:auto;opacity:0;transition:opacity .15s}
+.history-item:hover .history-del{opacity:1}
+.spinner{width:13px;height:13px;border:2px solid rgba(255,255,255,.3);border-top-color:var(--bg);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:720px){.layout{grid-template-columns:1fr}.history-panel{position:static}.plan-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><svg viewBox="0 0 16 16"><path d="M8 1L10.5 6H14L10.5 9.5L12 14L8 11L4 14L5.5 9.5L2 6H5.5Z"/></svg></div>
+  <span class="logo-text">ListingPro</span>
+  <span class="logo-tag">voor bol.com verkopers</span>
+  <div id="user-info">
+    <span id="usage-display" class="usage-pill"></span>
+    <span id="user-email-display"></span>
+    <button id="upgrade-header-btn" class="btn btn-sm" onclick="showUpgrade()" style="display:none">Upgraden</button>
+    <button class="btn-ghost btn-sm" onclick="doLogout()">Uitloggen</button>
+  </div>
+</header>
+
+<!-- Auth screen -->
+<div id="auth-screen" class="fullscreen">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <div class="logo"><svg viewBox="0 0 16 16"><path d="M8 1L10.5 6H14L10.5 9.5L12 14L8 11L4 14L5.5 9.5L2 6H5.5Z"/></svg></div>
+      <div class="auth-logo-text">ListingPro</div>
+      <div class="auth-logo-sub">bol.com listing optimizer</div>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Inloggen</button>
+      <button class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Registreren</button>
+    </div>
+    <div class="auth-card">
+      <div id="auth-success" class="auth-success"></div>
+      <div id="auth-error" class="auth-error"></div>
+      <div id="form-login-auth">
+        <div class="auth-field">
+          <label>E-mailadres</label>
+          <input type="email" id="login-email" placeholder="jouw@email.nl" onkeydown="if(event.key==='Enter')doLogin()">
+        </div>
+        <div class="auth-field auth-field-last">
+          <label>Wachtwoord</label>
+          <input type="password" id="login-password" placeholder="Wachtwoord" onkeydown="if(event.key==='Enter')doLogin()">
+        </div>
+        <button class="btn" style="width:100%;justify-content:center" onclick="doLogin()" id="login-btn">Inloggen</button>
+      </div>
+      <div id="form-register-auth" style="display:none">
+        <div class="auth-free-badge">
+          <strong>1 gratis analyse — geen creditcard vereist</strong>
+          Start gratis en upgrade wanneer je meer nodig hebt.
+        </div>
+        <div class="auth-field">
+          <label>E-mailadres</label>
+          <input type="email" id="reg-email" placeholder="jouw@email.nl" onkeydown="if(event.key==='Enter')doRegister()">
+        </div>
+        <div class="auth-field auth-field-last">
+          <label>Wachtwoord</label>
+          <input type="password" id="reg-password" placeholder="Minimaal 8 tekens" onkeydown="if(event.key==='Enter')doRegister()">
+        </div>
+        <button class="btn" style="width:100%;justify-content:center" onclick="doRegister()" id="register-btn">Account aanmaken</button>
+      </div>
+    </div>
+    <div class="auth-switch" id="auth-switch-text">
+      Nog geen account? <a onclick="switchAuthTab('register')">Registreren</a>
+    </div>
+  </div>
+</div>
+
+<!-- Verify screen -->
+<div id="verify-screen" class="fullscreen">
+  <div class="auth-box">
+    <div class="auth-card" style="text-align:center;padding:32px">
+      <div class="verify-icon">&#9993;</div>
+      <h2 style="font-size:18px;font-weight:500;margin-bottom:10px">Verifieer je e-mailadres</h2>
+      <p style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:8px">
+        We hebben een verificatielink gestuurd naar<br>
+        <span class="verify-email-address" id="verify-email-shown"></span>
+      </p>
+      <p style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:24px">
+        Klik de link in de e-mail om je account te activeren en te beginnen.
+      </p>
+      <div id="verify-success" class="auth-success" style="text-align:left;margin-bottom:16px"></div>
+      <div id="verify-error-msg" class="auth-error" style="text-align:left;margin-bottom:16px"></div>
+      <p style="font-size:12px;color:var(--text3);margin-bottom:16px">
+        Geen e-mail ontvangen? Controleer je spam-map of
+        <button class="resend-link" id="resend-btn" onclick="resendVerification()">stuur opnieuw</button>
+      </p>
+      <button class="btn-ghost btn-sm" onclick="doLogout()" style="font-size:12px">Ander account gebruiken</button>
+    </div>
+  </div>
+</div>
+
+<!-- Upgrade modal -->
+<div id="upgrade-modal" style="display:none">
+  <div class="upgrade-box">
+    <button class="upgrade-close" onclick="closeUpgrade()">&#10005;</button>
+    <h2>Kies je abonnement</h2>
+    <p class="upgrade-intro" id="upgrade-intro">Upgrade om meer listings te analyseren.</p>
+    <div class="plan-grid">
+      <div class="plan-card">
+        <div class="plan-name">Starter</div>
+        <div class="plan-price">€19 <span>/maand</span></div>
+        <div class="plan-limit">15 analyses per maand<br>Teller reset elke maand</div>
+        <button class="plan-btn outline" onclick="startCheckout('starter')">Kies Starter</button>
+      </div>
+      <div class="plan-card featured">
+        <div class="plan-badge">Meest gekozen</div>
+        <div class="plan-name">Pro</div>
+        <div class="plan-price">€49 <span>/maand</span></div>
+        <div class="plan-limit">Onbeperkt analyses<br>Nooit een limiet</div>
+        <button class="plan-btn" onclick="startCheckout('pro')">Kies Pro</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Main app -->
+<main id="main-app" style="display:none">
+<div class="layout">
+<div class="main-col">
+  <h1>Listing analyseren</h1>
+  <p class="sub">Verbeter een bestaande listing of genereer een nieuwe op basis van een producthandleiding.</p>
+  <div id="input-section">
+    <div class="mode-picker">
+      <div class="mode-card active" id="mode-improve" onclick="setMode('improve')">
+        <div class="mode-icon">&#9998;</div>
+        <div class="mode-title">Bestaande listing verbeteren</div>
+        <div class="mode-desc">Plak je huidige titel, bullets en beschrijving. Je krijgt scores en verbeterde teksten.</div>
+      </div>
+      <div class="mode-card" id="mode-generate" onclick="setMode('generate')">
+        <div class="mode-icon">&#8679;</div>
+        <div class="mode-title">Nieuwe listing van handleiding <span class="new-badge">nieuw</span></div>
+        <div class="mode-desc">Upload een PDF handleiding. De tool genereert een volledige listing op basis van de specs.</div>
+      </div>
+    </div>
+    <div id="form-improve">
+      <div class="card">
+        <div class="fg">
+          <label>Producttitel</label>
+          <input type="text" id="inp-title" placeholder="Bijv. Ergonomische bureaustoel zwart met verstelbare armleuningen" maxlength="300">
+          <div class="hint" id="title-hint">0/65 tekens — bol.com toont maximaal 65 tekens</div>
+        </div>
+        <div class="fg">
+          <label>Bullets / opsommingspunten</label>
+          <textarea id="inp-bullets" rows="7" placeholder="Plak hier je bullets, één per regel"></textarea>
+          <div class="hint">Één bullet per regel — bol.com kapt bullets af na circa 120 tekens</div>
+        </div>
+        <div class="fg">
+          <label>Productbeschrijving</label>
+          <textarea id="inp-desc" rows="7" placeholder="Plak hier je volledige productbeschrijving..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div id="form-generate" style="display:none">
+      <div class="pdf-hint">Upload de officiële producthandleiding als PDF. De tool leest alle specs en genereert een volledige bol.com listing.</div>
+      <div class="card">
+        <div class="fg">
+          <label>Productnaam / merknaam (optioneel)</label>
+          <input type="text" id="inp-product-name" placeholder="Bijv. BRASQ OC200 Bureaustoel">
+        </div>
+        <div class="fg">
+          <label>Producthandleiding (PDF)</label>
+          <div class="upload-zone" id="upload-zone">
+            <input type="file" id="pdf-input" accept=".pdf,application/pdf" onchange="onFileSelect(this)">
+            <div class="upload-icon"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+            <div class="upload-title" id="upload-title">Klik om PDF te uploaden</div>
+            <div class="upload-sub" id="upload-sub">of sleep het bestand hierheen — max. 10 MB</div>
+          </div>
+        </div>
+        <div class="fg">
+          <label>Productcategorie (optioneel)</label>
+          <input type="text" id="inp-category" placeholder="Bijv. Bureaustoelen, Koffiezetapparaten...">
+        </div>
+      </div>
+    </div>
+    <button class="btn" id="abtn" onclick="analyze()">
+      <span id="bspinner" style="display:none" class="spinner"></span>
+      <span id="blbl">Listing analyseren</span>
+    </button>
+    <div class="err" id="err"></div>
+  </div>
+  <div id="loading"><p class="slbl">Bezig met verwerken</p><ul class="steps" id="steps"></ul></div>
+  <div id="results"></div>
+</div>
+<div class="history-panel">
+  <div class="history-header"><span class="history-title">Eerdere analyses</span></div>
+  <div id="history-list"><div class="history-empty">Nog geen analyses opgeslagen.<br>Resultaten verschijnen hier automatisch.</div></div>
+</div>
+</div>
+</main>
+
+<script>
+// ── Auth state ────────────────────────────────────────────────────
+var currentUser = null;
+var authToken = null;
+
+// ── Screen management ─────────────────────────────────────────────
+function showScreen(name) {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('verify-screen').style.display = 'none';
+  document.getElementById('main-app').style.display = 'none';
+  document.getElementById('user-info').style.display = 'none';
+  if (name === 'auth') {
+    document.getElementById('auth-screen').style.display = 'flex';
+  } else if (name === 'verify') {
+    document.getElementById('verify-screen').style.display = 'flex';
+    if (currentUser) document.getElementById('verify-email-shown').textContent = currentUser.email;
+  } else if (name === 'app') {
+    document.getElementById('main-app').style.display = 'block';
+    document.getElementById('user-info').style.display = 'flex';
+    updateUsageDisplay();
+    loadHistory();
+  }
+}
+
+// ── Auth check ────────────────────────────────────────────────────
+function checkAuth() {
+  // Handle redirect params from email verification
+  var params = new URLSearchParams(window.location.search);
+  if (params.get('verified') === '1') {
+    history.replaceState({}, '', '/');
+    // Show success on login screen
+    switchAuthTab('login');
+    showAuthSuccess('E-mailadres bevestigd! Je kunt nu inloggen.');
+  }
+  if (params.get('verify_error') === '1') {
+    history.replaceState({}, '', '/');
+    switchAuthTab('login');
+    showAuthError('Verificatielink is verlopen of ongeldig. Registreer opnieuw of vraag een nieuwe link aan.');
+  }
+
+  authToken = localStorage.getItem('lp_token');
+  if (!authToken) { showScreen('auth'); return; }
+
+  fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + authToken } })
+    .then(function(r) { return r.json(); })
+    .then(function(user) {
+      if (user.error) { clearAuth(); showScreen('auth'); return; }
+      currentUser = user;
+      if (!user.verified) { showScreen('verify'); return; }
+      showScreen('app');
+    })
+    .catch(function() { clearAuth(); showScreen('auth'); });
+}
+
+function updateUsageDisplay() {
+  if (!currentUser) return;
+  var u = currentUser;
+  var el = document.getElementById('usage-display');
+  var upgradeBtn = document.getElementById('upgrade-header-btn');
+  document.getElementById('user-email-display').textContent = u.email;
+  if (u.tier === 'pro') {
+    el.textContent = 'Onbeperkt'; el.className = 'usage-pill pro';
+    upgradeBtn.style.display = 'none';
+  } else {
+    var remaining = Math.max(0, u.analyses_limit - u.analyses_used);
+    var label = u.tier === 'free'
+      ? (remaining + ' gratis ' + (remaining === 1 ? 'analyse' : 'analyses') + ' over')
+      : (remaining + ' van 15 analyses over');
+    el.textContent = label;
+    el.className = 'usage-pill' + (remaining <= 1 ? ' low' : '');
+    upgradeBtn.style.display = 'inline-flex';
+  }
+}
+
+// ── Auth functions ─────────────────────────────────────────────────
+function switchAuthTab(tab) {
+  document.getElementById('form-login-auth').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('form-register-auth').style.display = tab === 'register' ? 'block' : 'none';
+  document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+  document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+  document.getElementById('auth-switch-text').innerHTML = tab === 'login'
+    ? 'Nog geen account? <a onclick="switchAuthTab(\'register\')">Registreren</a>'
+    : 'Al een account? <a onclick="switchAuthTab(\'login\')">Inloggen</a>';
+  hideAuthError(); hideAuthSuccess();
+}
+
+function doLogin() {
+  var email = document.getElementById('login-email').value.trim();
+  var password = document.getElementById('login-password').value;
+  if (!email || !password) { showAuthError('Vul je e-mailadres en wachtwoord in'); return; }
+  var btn = document.getElementById('login-btn');
+  btn.disabled = true; btn.textContent = 'Bezig...';
+  authPost('/api/auth/login', { email: email, password: password }, btn, 'Inloggen');
+}
+
+function doRegister() {
+  var email = document.getElementById('reg-email').value.trim();
+  var password = document.getElementById('reg-password').value;
+  if (!email || !password) { showAuthError('Vul je e-mailadres en wachtwoord in'); return; }
+  var btn = document.getElementById('register-btn');
+  btn.disabled = true; btn.textContent = 'Bezig...';
+  authPost('/api/auth/register', { email: email, password: password }, btn, 'Account aanmaken');
+}
+
+function authPost(url, data, btn, btnLabel) {
+  hideAuthError(); hideAuthSuccess();
+  fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      btn.disabled = false; btn.textContent = btnLabel;
+      if (res.error) { showAuthError(res.error); return; }
+      authToken = res.token;
+      localStorage.setItem('lp_token', authToken);
+      currentUser = res.user;
+      if (!res.user.verified) { showScreen('verify'); return; }
+      showScreen('app');
+    })
+    .catch(function() {
+      btn.disabled = false; btn.textContent = btnLabel;
+      showAuthError('Verbindingsfout, probeer opnieuw');
+    });
+}
+
+function doLogout() {
+  clearAuth(); resetTool(); showScreen('auth');
+}
+
+function clearAuth() {
+  localStorage.removeItem('lp_token');
+  authToken = null; currentUser = null;
+}
+
+function showAuthError(msg) { var e = document.getElementById('auth-error'); e.textContent = msg; e.style.display = 'block'; }
+function hideAuthError() { document.getElementById('auth-error').style.display = 'none'; }
+function showAuthSuccess(msg) { var e = document.getElementById('auth-success'); e.textContent = msg; e.style.display = 'block'; }
+function hideAuthSuccess() { document.getElementById('auth-success').style.display = 'none'; }
+
+// ── Email verification ─────────────────────────────────────────────
+function resendVerification() {
+  var btn = document.getElementById('resend-btn');
+  btn.disabled = true; btn.textContent = 'Bezig...';
+  document.getElementById('verify-success').style.display = 'none';
+  document.getElementById('verify-error-msg').style.display = 'none';
+  fetch('/api/auth/resend-verification', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken } })
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      if (res.error) {
+        document.getElementById('verify-error-msg').textContent = res.error;
+        document.getElementById('verify-error-msg').style.display = 'block';
+      } else {
+        document.getElementById('verify-success').textContent = 'Verificatiemail opnieuw verstuurd! Controleer je inbox.';
+        document.getElementById('verify-success').style.display = 'block';
+      }
+      setTimeout(function() { btn.disabled = false; btn.textContent = 'stuur opnieuw'; }, 30000);
+    })
+    .catch(function() { btn.disabled = false; btn.textContent = 'stuur opnieuw'; });
+}
+
+// ── Upgrade ────────────────────────────────────────────────────────
+function showUpgrade(reason) {
+  if (reason) document.getElementById('upgrade-intro').textContent = reason;
+  document.getElementById('upgrade-modal').style.display = 'flex';
+}
+function closeUpgrade() { document.getElementById('upgrade-modal').style.display = 'none'; }
+function startCheckout(plan) {
+  fetch('/api/stripe/create-checkout', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken },
+    body: JSON.stringify({ plan: plan })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.url) { window.location.href = data.url; }
+    else { alert(data.error || 'Fout bij aanmaken betaalsessie'); }
+  })
+  .catch(function() { alert('Verbindingsfout, probeer opnieuw'); });
+}
+
+// ── Tool state ─────────────────────────────────────────────────────
+var currentMode = 'improve';
+var selectedPdfBase64 = null;
+var stepTimer = null;
+var lastResult = null;
+var lastMode = 'improve';
+var lastInput = {};
+var origTitle = '';
+var fb = {};
+
+// ── Prompts ────────────────────────────────────────────────────────
+var SYS_IMPROVE = 'Je bent een expert bol.com productlisting specialist.\n\nABSOLUTE REGELS:\n1. Verzin NOOIT specs, afmetingen, materialen, gewichten of andere claims die niet in de invoer staan.\n2. Gebruik ALLEEN informatie die letterlijk aanwezig is in de invoer.\n3. Ontbrekende info: gebruik placeholder [VOEG TOE: beschrijving].\n4. Eerlijke scores: gemiddelde listing = 30-55, uitzonderlijk goed = boven 75.\n\nSCHRIJFSTIJL:\n5. Geen emoji in bullets of beschrijving.\n6. Geen hoofdletters voor nadruk.\n7. Geen generieke marketingtaal: verboden zijn ontdek, transformeer, perfecte balans, kwalitatief, uniek, ideaal.\n8. Bullets beginnen met een concreet voordeel of werkwoord.\n9. Elke bullet maximaal 120 tekens. Titel strikt maximaal 65 tekens.\n10. Beschrijving: lopende alineas, geen lijstjes.\n\nBOL.COM:\n11. Belangrijkste zoekwoorden in eerste 40 tekens van titel.\n12. Eerste bullet is het belangrijkste voordeel.\n13. Beschrijving begint met concrete belofte, niet merknaam.\n\nGeef ALLEEN geldige JSON terug:\n{"scores":{"seo":0,"conversion":0,"clarity":0,"seo_reason":"","conversion_reason":"","clarity_reason":""},"overall_summary":"","priorities":[{"title":"","reason":"","actionable_now":true}],"improved":{"title":"","bullets":["","","","",""],"description":""},"missing_info":[""],"keywords":{"present":[""],"missing":[""]}}\n\nPrecies 3 prioriteiten, 3-5 missing_info, 4-6 aanwezige zoekwoorden, 6-8 ontbrekende.';
+
+var SYS_GENERATE = 'Je bent een expert bol.com productlisting specialist die listings genereert vanuit PDF handleidingen.\n\nABSOLUTE REGELS:\n1. Gebruik UITSLUITEND informatie uit de handleiding.\n2. Verzin GEEN specs, afmetingen, gewichten of certificeringen.\n3. Ontbrekende info: gebruik [VOEG TOE: beschrijving].\n4. Eerlijke scores. Goede listing op basis van volledige handleiding = 55-75.\n\nSCHRIJFSTIJL:\n5. Geen emoji. Geen hoofdletters voor nadruk.\n6. Geen generieke marketingtaal.\n7. Bullets beginnen met een concreet voordeel of werkwoord.\n8. Elke bullet maximaal 120 tekens. Titel strikt maximaal 65 tekens.\n9. Beschrijving: 3-4 lopende alineas.\n\nGeef ALLEEN geldige JSON terug:\n{"scores":{"seo":0,"conversion":0,"clarity":0,"seo_reason":"","conversion_reason":"","clarity_reason":""},"overall_summary":"","priorities":[{"title":"","reason":"","actionable_now":true}],"improved":{"title":"","bullets":["","","","",""],"description":""},"missing_info":[""],"keywords":{"present":[""],"missing":[""]}}\n\nPrecies 3 prioriteiten, 3-5 missing_info, 4-6 zoekwoorden uit handleiding, 6-8 aanbevolen extra.';
+
+var SYS_INCORPORATE = 'Je bent een expert bol.com productlisting specialist.\n\nJe krijgt een bestaande listing plus nieuw aangeleverde specs. Verwerk de specs op de logisch juiste plek.\n\nABSOLUTE REGELS:\n1. Gebruik ALLEEN informatie uit de originele listing EN de nieuw aangeleverde specs.\n2. Verzin NIETS extra.\n3. Bullets maximaal 120 tekens. Titel maximaal 65 tekens.\n4. Geen emoji, geen hoofdletters, geen generieke marketingtaal.\n\nSCORES:\n5. Scores zijn ALTIJD 0-100. Nooit 0-10.\n6. Als vorige scores zijn meegegeven: scores mogen NOOIT dalen.\n7. Gemiddelde listing = 30-55. Goed = 55-75. Uitzonderlijk = boven 75.\n\nGeef ALLEEN geldige JSON terug:\n{"scores":{"seo":0,"conversion":0,"clarity":0,"seo_reason":"","conversion_reason":"","clarity_reason":""},"overall_summary":"","priorities":[{"title":"","reason":"","actionable_now":true}],"improved":{"title":"","bullets":["","","","",""],"description":""},"missing_info":[""],"keywords":{"present":[""],"missing":[""]}}\n\nPrecies 3 prioriteiten, MAXIMAAL 2 missing_info, 4-6 aanwezige zoekwoorden, 6-8 ontbrekende.';
+
+var STEPS_IMPROVE = ['Listing structuur inlezen','SEO en zoekwoorden analyseren','Conversie en helderheid beoordelen','Verbeterde teksten schrijven','Kwaliteitscontrole uitvoeren'];
+var STEPS_GENERATE = ['PDF handleiding inlezen','Productspecificaties extraheren','Zoekwoorden bepalen','Listing schrijven','Kwaliteitscontrole uitvoeren'];
+var STEPS_UPDATE = ['Nieuwe specs verwerken','Listing herschrijven','Scores herberekenen','Kwaliteitscontrole'];
+
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById('mode-improve').classList.toggle('active', mode === 'improve');
+  document.getElementById('mode-generate').classList.toggle('active', mode === 'generate');
+  document.getElementById('form-improve').style.display = mode === 'improve' ? 'block' : 'none';
+  document.getElementById('form-generate').style.display = mode === 'generate' ? 'block' : 'none';
+  document.getElementById('blbl').textContent = mode === 'improve' ? 'Listing analyseren' : 'Listing genereren';
+}
+
+document.getElementById('inp-title').addEventListener('input', function() {
+  var n = this.value.length; var h = document.getElementById('title-hint');
+  if (n > 65) { h.textContent = n + '/65 tekens — te lang'; h.className = 'hint warn'; this.classList.add('over-limit'); }
+  else { h.textContent = n + '/65 tekens — bol.com toont maximaal 65 tekens'; h.className = 'hint'; this.classList.remove('over-limit'); }
+});
+
+var zone = document.getElementById('upload-zone');
+zone.addEventListener('dragover', function(e) { e.preventDefault(); zone.classList.add('dragover'); });
+zone.addEventListener('dragleave', function() { zone.classList.remove('dragover'); });
+zone.addEventListener('drop', function(e) { e.preventDefault(); zone.classList.remove('dragover'); var f = e.dataTransfer.files[0]; if (f) processPdf(f); });
+function onFileSelect(input) { if (input.files[0]) processPdf(input.files[0]); }
+function processPdf(file) {
+  if (file.size > 10 * 1024 * 1024) { showErr('Bestand is te groot — max. 10 MB'); return; }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    selectedPdfBase64 = e.target.result.split(',')[1];
+    zone.classList.add('file-selected');
+    document.getElementById('upload-title').textContent = file.name;
+    document.getElementById('upload-sub').textContent = Math.round(file.size / 1024) + ' KB';
+  };
+  reader.readAsDataURL(file);
+}
+
+function analyze() {
+  hideErr(); fb = {};
+  var body;
+  if (currentMode === 'improve') {
+    var title = document.getElementById('inp-title').value.trim();
+    var bullets = document.getElementById('inp-bullets').value.trim();
+    var desc = document.getElementById('inp-desc').value.trim();
+    if (!title && !bullets && !desc) { showErr('Vul minimaal een titel of beschrijving in.'); return; }
+    origTitle = title; lastInput = { title: title, bullets: bullets, desc: desc };
+    body = { model: 'claude-sonnet-4-20250514', max_tokens: 2500, system: SYS_IMPROVE,
+      messages: [{ role: 'user', content: 'Analyseer:\n\nTITEL:\n' + (title||'(leeg)') + '\n\nBULLETS:\n' + (bullets||'(leeg)') + '\n\nBESCHRIJVING:\n' + (desc||'(leeg)') }] };
+  } else {
+    if (!selectedPdfBase64) { showErr('Upload eerst een PDF handleiding.'); return; }
+    origTitle = ''; lastInput = { title: '', bullets: '', desc: '' };
+    var pName = document.getElementById('inp-product-name').value.trim();
+    var cat = document.getElementById('inp-category').value.trim();
+    var userText = 'Genereer een volledige bol.com listing.' + (pName ? '\n\nProductnaam: ' + pName : '') + (cat ? '\nCategorie: ' + cat : '') + '\n\nGebruik alleen informatie uit de handleiding.';
+    body = { model: 'claude-sonnet-4-20250514', max_tokens: 2500, system: SYS_GENERATE,
+      messages: [{ role: 'user', content: [
+        { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: selectedPdfBase64 } },
+        { type: 'text', text: userText }
+      ]}] };
+  }
+  startLoading(currentMode === 'improve' ? STEPS_IMPROVE : STEPS_GENERATE);
+  callApi(body, function(d) { lastResult = d; lastMode = currentMode; saveToHistory(d); setTimeout(function() { render(d); }, 400); });
+}
+
+function incorporateSpecs() {
+  var inputs = document.querySelectorAll('.missing-spec-input');
+  var filled = [];
+  inputs.forEach(function(inp) { var v = inp.value.trim(); if (v) filled.push(inp.dataset.label + ': ' + v); });
+  if (!filled.length) { showErr('Vul minimaal één gegeven in.'); return; }
+  hideErr();
+  var imp = (lastResult && lastResult.improved) ? lastResult.improved : {};
+  var curListing = 'TITEL:\n' + (imp.title || lastInput.title || '') +
+    '\n\nBULLETS:\n' + ((imp.bullets || []).map(function(b, i) { return (i+1) + '. ' + b; }).join('\n') || lastInput.bullets || '') +
+    '\n\nBESCHRIJVING:\n' + (imp.description || lastInput.desc || '');
+  var prevScores = lastResult && lastResult.scores
+    ? 'SEO: ' + Math.round(lastResult.scores.seo||0) + '/100, Conversie: ' + Math.round(lastResult.scores.conversion||0) + '/100, Helderheid: ' + Math.round(lastResult.scores.clarity||0) + '/100'
+    : null;
+  var userMsg = 'Verwerk de volgende aanvullende specificaties:\n\nNIEUWE SPECS:\n' + filled.join('\n') +
+    '\n\nBESTAANDE LISTING:\n' + curListing +
+    (prevScores ? '\n\nVORIGE SCORES: ' + prevScores + '\nScores mogen alleen gelijk blijven of stijgen.' : '');
+  document.getElementById('results').style.display = 'none';
+  startLoading(STEPS_UPDATE);
+  callApi({ model: 'claude-sonnet-4-20250514', max_tokens: 2500, system: SYS_INCORPORATE, messages: [{ role: 'user', content: userMsg }] },
+    function(d) { lastMode = 'update'; lastResult = d; saveToHistory(d); setTimeout(function() { render(d); }, 300); });
+}
+
+function callApi(body, onSuccess) {
+  fetch('/api/analyze', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken },
+    body: JSON.stringify(body)
+  })
+  .then(function(res) {
+    if (res.status === 401) { stopLoading(); clearAuth(); showScreen('auth'); throw new Error('Sessie verlopen — log opnieuw in'); }
+    if (res.status === 403) {
+      stopLoading(); document.getElementById('input-section').style.display = 'block';
+      return res.json().then(function(d) { showScreen('verify'); throw new Error('__handled__'); });
+    }
+    if (res.status === 402) {
+      stopLoading(); document.getElementById('input-section').style.display = 'block';
+      return res.json().then(function(data) {
+        showUpgrade(data.tier === 'free'
+          ? 'Je gratis analyse is op. Kies een plan om door te gaan.'
+          : 'Je hebt je maandlimiet van 15 analyses bereikt. Upgrade naar Pro voor onbeperkt gebruik.');
+        throw new Error('__handled__');
+      });
+    }
+    return res.json();
+  })
+  .then(function(data) {
+    clearInterval(stepTimer);
+    document.querySelectorAll('.step').forEach(function(el) { el.className = 'step done'; });
+    if (data.error) { var m = typeof data.error === 'object' ? (data.error.message || JSON.stringify(data.error)) : data.error; throw new Error(m); }
+    if (!data.content) throw new Error('Onverwacht antwoord, probeer opnieuw.');
+    var raw = data.content.map(function(b) { return b.text || ''; }).join('').replace(/```json|```/g, '').trim();
+    var d; try { d = JSON.parse(raw); } catch(pe) { throw new Error('Kon antwoord niet verwerken — probeer opnieuw.'); }
+    stopLoading();
+    if (currentUser) { currentUser.analyses_used = (currentUser.analyses_used || 0) + 1; updateUsageDisplay(); }
+    onSuccess(d);
+  })
+  .catch(function(e) {
+    if (e.message === '__handled__') return;
+    clearInterval(stepTimer); stopLoading();
+    document.getElementById('input-section').style.display = 'block';
+    document.getElementById('results').style.display = 'none';
+    showErr('Fout: ' + e.message);
+  });
+}
+
+function startLoading(steps) {
+  document.getElementById('input-section').style.display = 'none';
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('bspinner').style.display = 'inline-block';
+  document.getElementById('blbl').textContent = 'Bezig...';
+  document.getElementById('abtn').disabled = true;
+  var ul = document.getElementById('steps');
+  ul.innerHTML = steps.map(function(s, i) { return '<li class="step" id="s' + i + '"><span class="dot"></span>' + s + '</li>'; }).join('');
+  var idx = 0;
+  stepTimer = setInterval(function() {
+    if (idx > 0) { var p = document.getElementById('s' + (idx-1)); if (p) p.className = 'step done'; }
+    var c = document.getElementById('s' + idx); if (c) { c.className = 'step active'; idx++; } else clearInterval(stepTimer);
+  }, 1800);
+}
+function stopLoading() {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('bspinner').style.display = 'none';
+  document.getElementById('blbl').textContent = currentMode === 'improve' ? 'Listing analyseren' : 'Listing genereren';
+  document.getElementById('abtn').disabled = false;
+}
+
+function render(d) {
+  var el = document.getElementById('results'); el.style.display = 'block';
+  var imp = d.improved || {};
+  var newTitle = imp.title || '';
+  var bulletsTxt = (imp.bullets || []).map(function(b, i) { return (i+1) + '. ' + b; }).join('\n');
+  var avg = Math.round(((d.scores.seo||0) + (d.scores.conversion||0) + (d.scores.clarity||0)) / 3);
+  var isGen = lastMode === 'generate';
+  var scoreBanner = (function() {
+    var label, desc, bg, color;
+    if (avg >= 75) { label = 'Uitstekende listing'; desc = 'Beter dan de meeste concurrenten op bol.com. Klaar om live te zetten.'; bg = 'var(--green-bg)'; color = 'var(--green-text)'; }
+    else if (avg >= 65) { label = 'Goede listing — klaar om live te zetten'; desc = 'Alle essentiële informatie aanwezig en copy is verkoopgericht. Optioneel nog een ronde aanvullen voor extra winst.'; bg = 'var(--green-bg)'; color = 'var(--green-text)'; }
+    else if (avg >= 50) { label = 'Acceptabele listing — ruimte voor verbetering'; desc = 'De listing functioneert maar laat conversie liggen. Vul de ontbrekende specs aan voor merkbaar hogere score.'; bg = 'var(--amber-bg)'; color = 'var(--amber-text)'; }
+    else { label = 'Zwakke listing — aanpassen voor live zetten'; desc = 'Belangrijke informatie ontbreekt. Los de bovenste prioriteiten op voordat je deze listing live zet.'; bg = 'var(--red-bg)'; color = 'var(--red-text)'; }
+    return '<div style="background:' + bg + ';border-radius:var(--radius);padding:12px 16px;margin-bottom:20px"><div style="font-size:13px;font-weight:500;color:' + color + ';margin-bottom:3px">' + label + '</div><div style="font-size:12px;color:' + color + ';opacity:.85;line-height:1.5">' + desc + '</div></div>';
+  })();
+  var missingFields = (function() {
+    var items = d.missing_info || [];
+    var shown = lastMode === 'update' ? items.slice(0, 2) : items;
+    return shown.map(function(m) {
+      var ph = m.toLowerCase().indexOf('liter') >= 0 || m.toLowerCase().indexOf('capaciteit') >= 0 ? 'Bijv. 6,2 liter' :
+               m.toLowerCase().indexOf('watt') >= 0 ? 'Bijv. 2000 watt' :
+               m.toLowerCase().indexOf('afmeting') >= 0 ? 'Bijv. 38 x 32 x 30 cm' :
+               m.toLowerCase().indexOf('gewicht') >= 0 ? 'Bijv. 5,3 kg' :
+               m.toLowerCase().indexOf('garantie') >= 0 ? 'Bijv. 2 jaar' :
+               m.toLowerCase().indexOf('kleur') >= 0 ? 'Bijv. zwart, wit' :
+               m.toLowerCase().indexOf('materiaal') >= 0 ? 'Bijv. roestvrij staal' : 'Vul hier de waarde in';
+      return '<div class="spec-row"><span style="font-size:13px;color:var(--text2)">' + esc(m) + '</span><input type="text" class="missing-spec-input" data-label="' + esc(m) + '" placeholder="' + ph + '" style="margin:0;min-width:0"></div>';
+    }).join('');
+  })();
+  el.innerHTML =
+    '<div class="overall">' + esc(d.overall_summary) + '</div>' +
+    '<p class="slbl">Scores</p>' +
+    '<div class="scores">' + scoreCard('seo', d.scores.seo, 'SEO', d.scores.seo_reason) + scoreCard('conv', d.scores.conversion, 'Conversie', d.scores.conversion_reason) + scoreCard('clar', d.scores.clarity, 'Helderheid', d.scores.clarity_reason) + '</div>' +
+    '<div class="score-avg">Gemiddelde score: <strong>' + avg + '/100</strong></div>' +
+    scoreBanner +
+    '<div class="divider"></div><p class="slbl">Prioriteiten</p>' +
+    (d.priorities || []).map(function(p, i) { return '<div class="pcard"><div class="pnum">' + (i+1) + '</div><div><div class="ptitle">' + esc(p.title) + '</div><div class="preason">' + esc(p.reason) + '</div><span class="ptag ' + (p.actionable_now ? 'tag-now' : 'tag-later') + '">' + (p.actionable_now ? 'Direct aanpakken' : 'Extra info nodig') + '</span></div></div>'; }).join('') +
+    '<div class="divider"></div><p class="slbl">' + (isGen ? 'Gegenereerde listing' : 'Verbeterde listing') + '</p>' +
+    (isGen ? titleField(newTitle) : titleBA(origTitle, newTitle)) +
+    outputField('Bullets', bulletsTxt, 'bullets') + outputField('Beschrijving', imp.description || '', 'desc') +
+    '<div class="divider"></div>' +
+    '<div class="slbl">' + (lastMode === 'update' ? 'Nog verder te verbeteren (optioneel)' : 'Ontbrekende informatie — vul aan voor betere teksten') + '</div>' +
+    '<div style="font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.5">' + (lastMode === 'update' ? 'Goed resultaat! Wil je nog verder optimaliseren, vul dan onderstaande gegevens in.' : 'Vul de ontbrekende gegevens in en klik <strong>Listing updaten</strong>.') + '</div>' +
+    '<div id="missing-fields">' + missingFields + '</div>' +
+    '<button class="btn" onclick="incorporateSpecs()" style="margin:12px 0 20px">Listing updaten</button>' +
+    '<div class="divider"></div><p class="slbl">Zoekwoorden</p>' +
+    '<div class="kwgrid"><div><div class="kwlbl">' + (isGen ? 'Gevonden in handleiding' : 'Aanwezig') + '</div>' + (d.keywords.present || []).map(function(k) { return '<span class="kw kw-p">' + esc(k) + '</span>'; }).join('') + '</div>' +
+    '<div><div class="kwlbl">Toe te voegen</div>' + (d.keywords.missing || []).map(function(k) { return '<span class="kw kw-m">' + esc(k) + '</span>'; }).join('') + '</div></div>' +
+    '<div class="divider"></div>' +
+    '<div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" onclick="downloadReport()">Actiepakket downloaden</button><button class="btn-ghost" onclick="resetTool()">Opnieuw beginnen</button></div>';
+  setTimeout(function() { ['seo','conv','clar'].forEach(function(id) { var b = document.getElementById('bar-' + id); if (b) b.style.width = b.dataset.w + '%'; }); }, 100);
+}
+
+function scoreCard(id, val, lbl, reason) {
+  var n = Math.round(val || 0); var cls = n >= 70 ? 'high' : n >= 45 ? 'mid' : 'low';
+  return '<div class="sc ' + cls + '"><div class="sc-lbl">' + lbl + '</div><div class="sc-num">' + n + '</div><div class="sc-bar"><div class="sc-fill" id="bar-' + id + '" data-w="' + n + '"></div></div><div class="sc-rsn">' + esc(reason) + '</div></div>';
+}
+function titleField(improved) {
+  var n = improved.length; var pill = '<span class="char-pill ' + (n <= 65 ? 'char-ok' : 'char-warn') + '">' + n + '/65</span>';
+  return '<div class="ofield"><div class="ofhdr"><div class="ofhdr-l"><span class="oflbl">Titel</span>' + pill + '</div><div class="ofhdr-r">' + fbBtns('title') + '<button class="btn-copy" id="cp-title" onclick="cp(\'cp-title\',' + JSON.stringify(improved) + ')">Kopieer</button></div></div><div class="ofbody">' + phFmt(improved) + '</div></div>';
+}
+function titleBA(orig, improved) {
+  var n = improved.length; var pill = '<span class="char-pill ' + (n <= 65 ? 'char-ok' : 'char-warn') + '">' + n + '/65</span>';
+  return '<div class="ba-wrap"><div class="ba-hdr"><div class="ba-hdr-l"><span class="oflbl">Titel</span>' + pill + '</div><div class="ba-hdr-r">' + fbBtns('title') + '<button class="btn-copy" id="cp-title" onclick="cp(\'cp-title\',' + JSON.stringify(improved) + ')">Kopieer</button></div></div><div class="ba-grid"><div class="ba-col"><div class="ba-lbl">Voor</div><div class="ba-txt">' + (orig ? esc(orig) : '<span style="color:var(--text3);font-style:italic">Niet ingevuld</span>') + '</div></div><div class="ba-col"><div class="ba-lbl">Na</div><div class="ba-txt new">' + phFmt(improved) + '</div></div></div></div>';
+}
+function outputField(lbl, raw, key) {
+  var uid = 'cp-' + key;
+  return '<div class="ofield"><div class="ofhdr"><div class="ofhdr-l"><span class="oflbl">' + lbl + '</span></div><div class="ofhdr-r">' + fbBtns(key) + '<button class="btn-copy" id="' + uid + '" onclick="cp(\'' + uid + '\',' + JSON.stringify(raw) + ')">Kopieer</button></div></div><div class="ofbody">' + phFmt(raw) + '</div></div>';
+}
+function fbBtns(key) {
+  return '<button class="fb-btn" id="fbu-' + key + '" onclick="setFb(\'' + key + '\',\'up\')" title="Goed">&#8679;</button><button class="fb-btn" id="fbd-' + key + '" onclick="setFb(\'' + key + '\',\'dn\')" title="Kan beter">&#8681;</button>';
+}
+function setFb(key, dir) {
+  if (fb[key] === dir) { fb[key] = null; document.getElementById('fbu-' + key).className = 'fb-btn'; document.getElementById('fbd-' + key).className = 'fb-btn'; return; }
+  fb[key] = dir;
+  document.getElementById('fbu-' + key).className = 'fb-btn' + (dir === 'up' ? ' up' : '');
+  document.getElementById('fbd-' + key).className = 'fb-btn' + (dir === 'dn' ? ' dn' : '');
+}
+function cp(id, txt) {
+  navigator.clipboard.writeText(txt).then(function() {
+    var b = document.getElementById(id); b.textContent = 'Gekopieerd'; b.classList.add('ok');
+    setTimeout(function() { b.textContent = 'Kopieer'; b.classList.remove('ok'); }, 2000);
+  });
+}
+function phFmt(s) { return esc(s).replace(/\[VOEG TOE: ([^\]]+)\]/g, '<span class="ph">[VOEG TOE: $1]</span>'); }
+
+function resetTool() {
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('results').innerHTML = '';
+  document.getElementById('input-section').style.display = 'block';
+  ['inp-title','inp-bullets','inp-desc','inp-product-name','inp-category'].forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; });
+  var h = document.getElementById('title-hint'); h.textContent = '0/65 tekens — bol.com toont maximaal 65 tekens'; h.className = 'hint';
+  document.getElementById('inp-title').classList.remove('over-limit');
+  selectedPdfBase64 = null; zone.classList.remove('file-selected');
+  document.getElementById('upload-title').textContent = 'Klik om PDF te uploaden';
+  document.getElementById('upload-sub').textContent = 'of sleep het bestand hierheen — max. 10 MB';
+  document.getElementById('pdf-input').value = '';
+  window.scrollTo(0, 0);
+}
+
+function getLocalHistory() { try { return JSON.parse(localStorage.getItem('lp_history') || '[]'); } catch(e) { return []; } }
+function saveToHistory(d) {
+  try {
+    if (!d || !d.scores) return;
+    var avg = Math.round(((d.scores.seo||0) + (d.scores.conversion||0) + (d.scores.clarity||0)) / 3);
+    if (avg < 5) return;
+    var productName = lastMode === 'generate'
+      ? (document.getElementById('inp-product-name').value.trim() || (d.improved && d.improved.title) || 'Product')
+      : (lastInput.title || (d.improved && d.improved.title) || 'Product');
+    var history = getLocalHistory();
+    history.unshift({ id: Date.now().toString(), date: new Date().toISOString(), productName: productName, mode: lastMode, scores: d.scores, avg: avg, result: d, inputTitle: lastInput.title || '' });
+    if (history.length > 30) history.splice(30);
+    localStorage.setItem('lp_history', JSON.stringify(history));
+    loadHistory();
+  } catch(e) {}
+}
+function loadHistory() {
+  var items = getLocalHistory().filter(function(e) { return e.avg && e.avg > 3; });
+  var el = document.getElementById('history-list');
+  if (!items.length) { el.innerHTML = '<div class="history-empty">Nog geen analyses opgeslagen.<br>Resultaten verschijnen hier automatisch.</div>'; return; }
+  el.innerHTML = items.map(function(item) {
+    var avg = item.avg || 0;
+    var sc = avg >= 70 ? 'background:var(--green-bg);color:var(--green-text)' : avg >= 45 ? 'background:var(--amber-bg);color:var(--amber-text)' : 'background:var(--red-bg);color:var(--red-text)';
+    var date = new Date(item.date).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' });
+    return '<div class="history-item" onclick="restoreHistory(\'' + item.id + '\')"><div class="history-item-name" title="' + esc(item.productName || '') + '">' + esc((item.productName || 'Onbekend').slice(0, 28)) + '</div><div class="history-item-meta"><span class="history-score" style="' + sc + '">' + avg + '/100</span><span>' + date + ' · ' + (item.mode === 'generate' ? 'PDF' : 'analyse') + '</span><button class="history-del" onclick="deleteHistory(event,\'' + item.id + '\')" title="Verwijderen">&#10005;</button></div></div>';
+  }).join('');
+}
+function restoreHistory(id) {
+  var entry = getLocalHistory().find(function(e) { return e.id === id; });
+  if (!entry || !entry.result) return;
+  lastResult = entry.result; lastMode = entry.mode || 'improve'; lastInput = { title: entry.inputTitle || '', bullets: '', desc: '' }; origTitle = entry.inputTitle || '';
+  document.getElementById('input-section').style.display = 'none';
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('results').style.display = 'none';
+  render(entry.result); window.scrollTo(0, 0);
+}
+function deleteHistory(e, id) {
+  e.stopPropagation();
+  var h = getLocalHistory().filter(function(entry) { return entry.id !== id; });
+  localStorage.setItem('lp_history', JSON.stringify(h));
+  loadHistory();
+}
+
+function showErr(m) { var e = document.getElementById('err'); e.textContent = m; e.style.display = 'block'; }
+function hideErr() { document.getElementById('err').style.display = 'none'; }
+function esc(s) { return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+document.addEventListener('DOMContentLoaded', function() { checkAuth(); });
+</script>
+
+<script>
+function downloadReport() {
+  if (!lastResult) return;
+  var d = lastResult; var imp = d.improved || {};
+  var dateStr = new Date().toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+  var productName = lastMode === 'generate' ? (document.getElementById('inp-product-name').value.trim() || imp.title || 'Product') : (origTitle || imp.title || 'Product');
+  var avg = Math.round(((d.scores.seo||0) + (d.scores.conversion||0) + (d.scores.clarity||0)) / 3);
+  var isGen = lastMode === 'generate';
+  function sColor(n) { return n>=70?'#0F6E56':n>=45?'#854F0B':'#A32D2D'; }
+  function sBg(n) { return n>=70?'#E1F5EE':n>=45?'#FAEEDA':'#FCEBEB'; }
+  function he(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function pt(s) { return (s||'').replace(/\[VOEG TOE: ([^\]]+)\]/g,'[ _____________ ($1) ]'); }
+  function fmt(s) { return he(pt(s)).replace(/\[([^\]]+)\]/g,'<span style="background:#FAEEDA;color:#854F0B;border-radius:3px;padding:1px 5px;font-size:11px">$1</span>'); }
+  var bHtml = (imp.bullets||[]).map(function(b,i) { return '<div style="display:flex;gap:10px;padding:8px 0;border-bottom:0.5px solid #e8e6de"><span style="color:#9c9a92;font-size:13px;min-width:20px">'+(i+1)+'.</span><span style="font-size:13px;line-height:1.5">'+fmt(b)+'</span></div>'; }).join('');
+  var mHtml = (d.missing_info||[]).map(function(m) { return '<div style="display:flex;gap:10px;padding:8px 0;border-bottom:0.5px solid #e8e6de;align-items:flex-start"><span style="width:16px;height:16px;border:1.5px solid #854F0B;border-radius:3px;display:inline-block;flex-shrink:0;margin-top:2px"></span><span style="font-size:13px;color:#5c5b56;line-height:1.5">'+he(m)+'</span></div>'; }).join('');
+  var pHtml = (d.priorities||[]).map(function(p,i) { return '<div style="border:0.5px solid #e8e6de;border-radius:8px;padding:12px 14px;margin-bottom:8px"><div style="font-size:13px;font-weight:500;margin-bottom:3px">'+(i+1)+'. '+he(p.title)+'</div><div style="font-size:12px;color:#5c5b56;line-height:1.4;margin-bottom:6px">'+he(p.reason)+'</div><span style="font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;background:'+(p.actionable_now?'#E1F5EE':'#FAEEDA')+';color:'+(p.actionable_now?'#085041':'#633806')+'">'+(p.actionable_now?'Direct aanpakken':'Extra info nodig')+'</span></div>'; }).join('');
+  var kwP = (d.keywords&&d.keywords.present||[]).map(function(k) { return '<span style="display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;margin:2px 3px 2px 0;background:#E1F5EE;color:#085041">'+he(k)+'</span>'; }).join('');
+  var kwM = (d.keywords&&d.keywords.missing||[]).map(function(k) { return '<span style="display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;margin:2px 3px 2px 0;background:#f7f6f3;color:#5c5b56;border:0.5px solid rgba(0,0,0,0.15)">'+he(k)+'</span>'; }).join('');
+  var descHtml = fmt(imp.description||'').replace(/\n\n/g,'</p><p style="margin:0 0 12px">').replace(/\n/g,'<br>');
+  var tLen = (imp.title||'').length;
+  var html = '<!DOCTYPE html><html lang="nl"><head><meta charset="UTF-8"><title>Actiepakket — '+he(productName)+'</title><style>@media print{body{margin:0}.no-print{display:none!important}.page-break{page-break-before:always}.avoid-break{page-break-inside:avoid}}*{box-sizing:border-box;margin:0;padding:0}body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:#1a1a18;font-size:14px;line-height:1.6;background:#fff}.page{max-width:720px;margin:0 auto;padding:40px 48px}.hdr{border-bottom:2px solid #1a1a18;padding-bottom:20px;margin-bottom:28px;display:flex;justify-content:space-between;align-items:flex-end}.brand{font-size:15px;font-weight:600}.brand span{opacity:.4;font-weight:400;margin-left:4px}.meta{font-size:12px;color:#9c9a92;text-align:right;line-height:1.5}h2{font-size:22px;font-weight:600;margin-bottom:4px}.sub-h{font-size:13px;color:#5c5b56;margin-bottom:28px}.sec{margin-bottom:28px}.sec-lbl{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#9c9a92;margin-bottom:10px;border-bottom:0.5px solid #e8e6de;padding-bottom:6px}.summary{background:#E6F1FB;border-radius:8px;padding:14px 16px;font-size:13px;color:#0C447C;line-height:1.55;margin-bottom:24px}.scores{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:8px}.sc-box{border-radius:8px;padding:14px}.sc-num{font-size:28px;font-weight:600;line-height:1;margin-bottom:6px}.sc-bar{height:3px;border-radius:2px;margin-bottom:7px;overflow:hidden}.sc-fill{height:100%;border-radius:2px}.sc-rsn{font-size:11px;line-height:1.4;opacity:.75}.field{border:0.5px solid #e8e6de;border-radius:8px;margin-bottom:10px;overflow:hidden}.field-hdr{background:#f7f6f3;padding:8px 12px;border-bottom:0.5px solid #e8e6de;display:flex;justify-content:space-between}.field-body{padding:12px 14px;font-size:13px;line-height:1.6}.char-pill{font-size:11px;padding:2px 7px;border-radius:20px;font-weight:500}.next{background:#1a1a18;color:#e8e6de;border-radius:10px;padding:20px 22px}.next h3{font-size:14px;font-weight:600;margin-bottom:12px;color:#fff}.next-item{display:flex;gap:12px;margin-bottom:10px;font-size:13px;color:#a8a69e;line-height:1.45}.step-num{background:rgba(255,255,255,0.15);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0;margin-top:1px}.kw-sec{display:grid;grid-template-columns:1fr 1fr;gap:16px}.kw-lbl{font-size:11px;font-weight:500;color:#5c5b56;margin-bottom:8px}.print-btn{position:fixed;bottom:24px;right:24px;background:#1a1a18;color:#fff;border:none;border-radius:10px;padding:12px 22px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit}</style></head><body><div class="page"><div class="hdr"><div class="brand">ListingPro <span>bol.com optimizer</span></div><div class="meta">'+he(productName)+'<br>'+dateStr+'</div></div><h2>'+(isGen?'Gegenereerde listing':'Listing analyse')+'</h2><div class="sub-h">'+(isGen?'Op basis van de producthandleiding':'Verbeterrapport')+' — '+dateStr+'</div><div class="summary">'+he(d.overall_summary||'')+'</div><div class="sec avoid-break"><div class="sec-lbl">Scores</div><div class="scores">'+['seo','conversion','clarity'].map(function(k,i){var lbl=['SEO','Conversie','Helderheid'][i];var n=Math.round(d.scores[k]||0);return '<div class="sc-box" style="background:'+sBg(n)+'"><div style="font-size:11px;font-weight:500;color:'+sColor(n)+';margin-bottom:6px">'+lbl+'</div><div class="sc-num" style="color:'+sColor(n)+'">'+n+'</div><div class="sc-bar" style="background:rgba(0,0,0,0.08)"><div class="sc-fill" style="width:'+n+'%;background:'+sColor(n)+'"></div></div><div class="sc-rsn" style="color:'+sColor(n)+'">'+he(d.scores[k+'_reason']||'')+'</div></div>';}).join('')+'</div><div style="font-size:13px;color:#5c5b56;margin-top:8px">Gemiddelde score: <strong>'+avg+'/100</strong></div></div><div class="sec avoid-break"><div class="sec-lbl">Prioriteiten</div>'+pHtml+'</div><div class="page-break"></div><div class="sec"><div class="sec-lbl">'+(isGen?'Gegenereerde listing':'Verbeterde listing')+'</div><div class="field avoid-break"><div class="field-hdr"><span style="font-size:11px;font-weight:500;color:#5c5b56">Titel</span><span class="char-pill" style="background:'+(tLen<=65?'#E1F5EE':'#FCEBEB')+';color:'+(tLen<=65?'#085041':'#791F1F')+'">'+tLen+'/65</span></div><div class="field-body" style="font-weight:500">'+fmt(imp.title||'')+'</div></div><div class="field avoid-break"><div class="field-hdr"><span style="font-size:11px;font-weight:500;color:#5c5b56">Bullets</span></div><div class="field-body" style="padding:0 14px">'+bHtml+'</div></div><div class="field"><div class="field-hdr"><span style="font-size:11px;font-weight:500;color:#5c5b56">Beschrijving</span></div><div class="field-body"><p style="margin:0 0 12px">'+descHtml+'</p></div></div></div><div class="sec avoid-break"><div class="sec-lbl">Informatie om nog te verzamelen</div><div style="font-size:13px;color:#5c5b56;margin-bottom:12px">Vink af zodra je de informatie hebt.</div>'+mHtml+'</div><div class="sec avoid-break"><div class="sec-lbl">Zoekwoorden</div><div class="kw-sec"><div><div class="kw-lbl">'+(isGen?'Gevonden in handleiding':'Aanwezig')+'</div>'+kwP+'</div><div><div class="kw-lbl">Toe te voegen</div>'+kwM+'</div></div></div><div class="sec next avoid-break"><h3>Volgende stappen</h3><div class="next-item"><div class="step-num">1</div><div>Verzamel de ontbrekende informatie — begin met de bovenste items.</div></div><div class="next-item"><div class="step-num">2</div><div>Voeg de missende zoekwoorden toe aan titel en bullets.</div></div><div class="next-item"><div class="step-num">3</div><div>Kom terug naar ListingPro voor een nieuwe analyse — je score stijgt significant.</div></div><div class="next-item"><div class="step-num">4</div><div>Pas de verbeterde teksten toe in je bol.com verkopersaccount.</div></div></div></div><button class="print-btn no-print" onclick="window.print()">Opslaan als PDF</button></body></html>';
+  var win = window.open('', '_blank'); win.document.write(html); win.document.close();
+}
+</script>
+
+</body>
+</html>
