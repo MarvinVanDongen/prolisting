@@ -10,6 +10,17 @@ const crypto = require("crypto");
 
 const app = express();
 
+
+// Serve landing page as homepage
+app.get("/", (req, res) => {
+  res.sendFile(__dirname + "/landing.html");
+});
+
+// Serve the tool at /tool
+app.get("/tool", (req, res) => {
+  res.sendFile(__dirname + "/index.html");
+});
+
 app.use("/api/stripe/webhook", express.raw({ type: "application/json" }));
 app.use(express.json({ limit: "50mb" }));
 app.use(express.static(__dirname));

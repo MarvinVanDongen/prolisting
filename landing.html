@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ProListing — bol.com listing optimizer voor verkopers</title>
+<meta name="description" content="Verbeter je bol.com productlistings met AI. Hogere scores, betere vindbaarheid, meer verkopen. Probeer gratis.">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --text:#1a1a18;--text2:#5c5b56;--text3:#9c9a92;
+  --bg:#ffffff;--bg2:#f7f6f3;--bg3:#eeede8;
+  --border:rgba(0,0,0,0.1);--border2:rgba(0,0,0,0.15);
+  --green:#0F6E56;--green-bg:#E1F5EE;--green-text:#085041;
+  --amber:#854F0B;--amber-bg:#FAEEDA;--amber-text:#633806;
+  --radius:10px;--radius-lg:14px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--text);background:var(--bg);font-size:16px;line-height:1.6}
+
+/* Nav */
+nav{border-bottom:0.5px solid var(--border);padding:14px 24px;display:flex;align-items:center;gap:12px;position:sticky;top:0;background:var(--bg);z-index:100}
+.nav-logo{width:28px;height:28px;background:var(--text);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.nav-logo svg{width:14px;height:14px;fill:#fff}
+.nav-brand{font-size:15px;font-weight:500}
+.nav-links{margin-left:auto;display:flex;align-items:center;gap:20px}
+.nav-links a{font-size:14px;color:var(--text2);text-decoration:none}
+.nav-links a:hover{color:var(--text)}
+.nav-cta{background:var(--text);color:#fff!important;border-radius:var(--radius);padding:8px 18px;font-size:13px;font-weight:500;text-decoration:none!important}
+.nav-cta:hover{opacity:.85}
+
+/* Hero */
+.hero{max-width:760px;margin:0 auto;padding:80px 24px 60px;text-align:center}
+.hero-badge{display:inline-block;background:var(--green-bg);color:var(--green-text);font-size:13px;font-weight:500;padding:5px 14px;border-radius:20px;margin-bottom:20px}
+.hero h1{font-size:48px;font-weight:600;line-height:1.15;margin-bottom:18px;letter-spacing:-0.02em}
+.hero h1 span{color:var(--text3)}
+.hero-sub{font-size:18px;color:var(--text2);margin-bottom:36px;line-height:1.6;max-width:560px;margin-left:auto;margin-right:auto}
+.hero-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:48px}
+.btn-primary{background:var(--text);color:#fff;border:none;border-radius:var(--radius);padding:14px 32px;font-size:15px;font-weight:500;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-block;transition:opacity .15s}
+.btn-primary:hover{opacity:.85}
+.btn-secondary{background:none;color:var(--text);border:0.5px solid var(--border2);border-radius:var(--radius);padding:14px 32px;font-size:15px;font-weight:500;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-block;transition:background .15s}
+.btn-secondary:hover{background:var(--bg2)}
+.hero-proof{font-size:13px;color:var(--text3)}
+
+/* Score preview */
+.score-preview{max-width:680px;margin:0 auto 80px;padding:0 24px}
+.preview-card{background:var(--bg2);border-radius:var(--radius-lg);padding:28px;border:0.5px solid var(--border)}
+.preview-label{font-size:11px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);margin-bottom:14px}
+.preview-scores{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.preview-score{background:var(--bg);border-radius:var(--radius);padding:14px;text-align:left}
+.ps-label{font-size:11px;font-weight:500;color:var(--text2);margin-bottom:6px}
+.ps-num{font-size:28px;font-weight:500;line-height:1;margin-bottom:5px}
+.ps-bar{height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.ps-fill{height:100%;border-radius:2px}
+.ps-reason{font-size:11px;color:var(--text2);line-height:1.4;margin-top:6px}
+.red .ps-num{color:#A32D2D}.red .ps-fill{background:#A32D2D}
+.amber .ps-num{color:#854F0B}.amber .ps-fill{background:#854F0B}
+.green .ps-num{color:#0F6E56}.green .ps-fill{background:#0F6E56}
+.preview-arrow{text-align:center;font-size:20px;color:var(--text3);margin:16px 0}
+.preview-result{background:var(--green-bg);border-radius:var(--radius);padding:14px 16px}
+.preview-result-label{font-size:11px;font-weight:500;color:var(--green-text);margin-bottom:4px}
+.preview-result-text{font-size:13px;color:var(--green-text);line-height:1.5}
+
+/* Features */
+.features{background:var(--bg2);padding:80px 24px}
+.section-inner{max-width:960px;margin:0 auto}
+.section-label{font-size:11px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);text-align:center;margin-bottom:12px}
+.section-title{font-size:32px;font-weight:600;text-align:center;margin-bottom:10px;letter-spacing:-0.01em}
+.section-sub{font-size:16px;color:var(--text2);text-align:center;margin-bottom:52px;max-width:520px;margin-left:auto;margin-right:auto}
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.feature-card{background:var(--bg);border-radius:var(--radius-lg);padding:24px;border:0.5px solid var(--border)}
+.feature-icon{width:40px;height:40px;background:var(--bg2);border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;font-size:18px}
+.feature-title{font-size:15px;font-weight:500;margin-bottom:6px}
+.feature-desc{font-size:13px;color:var(--text2);line-height:1.55}
+
+/* How it works */
+.how{padding:80px 24px}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:0}
+.step{text-align:center;padding:0 16px}
+.step-num{width:40px;height:40px;background:var(--text);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;margin:0 auto 16px}
+.step-title{font-size:15px;font-weight:500;margin-bottom:6px}
+.step-desc{font-size:13px;color:var(--text2);line-height:1.55}
+.step-divider{display:flex;align-items:center;justify-content:center;padding-top:20px;color:var(--text3);font-size:20px}
+
+/* Pricing */
+.pricing{background:var(--bg2);padding:80px 24px}
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:800px;margin:0 auto}
+.pricing-card{background:var(--bg);border-radius:var(--radius-lg);padding:28px;border:0.5px solid var(--border);position:relative}
+.pricing-card.featured{border-color:var(--text);border-width:1.5px}
+.pricing-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--text);color:#fff;font-size:11px;font-weight:500;padding:3px 12px;border-radius:20px;white-space:nowrap}
+.pricing-name{font-size:13px;font-weight:500;color:var(--text2);margin-bottom:8px}
+.pricing-price{font-size:36px;font-weight:600;margin-bottom:4px;letter-spacing:-0.02em}
+.pricing-price span{font-size:15px;font-weight:400;color:var(--text2)}
+.pricing-limit{font-size:13px;color:var(--text2);margin-bottom:20px;line-height:1.4}
+.pricing-features{list-style:none;margin-bottom:24px}
+.pricing-features li{font-size:13px;color:var(--text2);padding:5px 0;border-bottom:0.5px solid var(--border);display:flex;gap:8px;align-items:flex-start}
+.pricing-features li:last-child{border-bottom:none}
+.check{color:var(--green);font-size:14px;flex-shrink:0;margin-top:1px}
+.pricing-btn{width:100%;background:var(--text);color:#fff;border:none;border-radius:var(--radius);padding:11px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;text-decoration:none;display:block;text-align:center;transition:opacity .15s}
+.pricing-btn:hover{opacity:.85}
+.pricing-btn.outline{background:none;color:var(--text);border:0.5px solid var(--border2)}
+.pricing-btn.outline:hover{background:var(--bg2)}
+
+/* About */
+.about{padding:80px 24px}
+.about-inner{max-width:640px;margin:0 auto}
+.about-inner h2{font-size:28px;font-weight:600;margin-bottom:16px;letter-spacing:-0.01em}
+.about-inner p{font-size:15px;color:var(--text2);line-height:1.7;margin-bottom:16px}
+.about-inner p:last-child{margin-bottom:0}
+.about-sig{margin-top:28px;display:flex;align-items:center;gap:14px}
+.about-avatar{width:48px;height:48px;background:var(--bg2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:500;color:var(--text2);border:0.5px solid var(--border)}
+.about-name{font-size:14px;font-weight:500}
+.about-title{font-size:13px;color:var(--text2)}
+
+/* CTA */
+.cta{background:var(--text);padding:80px 24px;text-align:center}
+.cta h2{font-size:32px;font-weight:600;color:#fff;margin-bottom:12px;letter-spacing:-0.01em}
+.cta p{font-size:16px;color:rgba(255,255,255,0.6);margin-bottom:32px}
+.cta .btn-primary{background:#fff;color:var(--text)}
+.cta .btn-primary:hover{opacity:.9}
+.cta-note{font-size:13px;color:rgba(255,255,255,0.4);margin-top:14px}
+
+/* Footer */
+footer{background:var(--bg2);padding:40px 24px;border-top:0.5px solid var(--border)}
+.footer-inner{max-width:960px;margin:0 auto;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:24px}
+.footer-brand{display:flex;align-items:center;gap:8px}
+.footer-logo{width:24px;height:24px;background:var(--text);border-radius:6px;display:flex;align-items:center;justify-content:center}
+.footer-logo svg{width:12px;height:12px;fill:#fff}
+.footer-name{font-size:14px;font-weight:500}
+.footer-links{display:flex;gap:20px;flex-wrap:wrap}
+.footer-links a{font-size:13px;color:var(--text2);text-decoration:none}
+.footer-links a:hover{color:var(--text)}
+.footer-copy{font-size:12px;color:var(--text3);margin-top:6px}
+
+@media(max-width:680px){
+  .hero h1{font-size:32px}
+  .features-grid{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr}
+  .pricing-grid{grid-template-columns:1fr}
+  .nav-links a:not(.nav-cta){display:none}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo"><svg viewBox="0 0 16 16"><path d="M8 1L10.5 6H14L10.5 9.5L12 14L8 11L4 14L5.5 9.5L2 6H5.5Z"/></svg></div>
+  <span class="nav-brand">ProListing</span>
+  <div class="nav-links">
+    <a href="#hoe-het-werkt">Hoe het werkt</a>
+    <a href="#prijzen">Prijzen</a>
+    <a href="contact.html">Contact</a>
+    <a href="/tool" class="nav-cta">Gratis proberen</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-badge">Voor bol.com verkopers</div>
+  <h1>Betere listings.<br><span>Meer verkopen.</span></h1>
+  <p class="hero-sub">ProListing analyseert je bol.com productpagina's en geeft je direct bruikbare verbeteringen — betere titels, sterkere bullets, hogere vindbaarheid.</p>
+  <div class="hero-actions">
+    <a href="/tool" class="btn-primary">Gratis analyse starten</a>
+    <a href="#hoe-het-werkt" class="btn-secondary">Hoe het werkt</a>
+  </div>
+  <p class="hero-proof">1 gratis analyse · Geen creditcard vereist · Direct resultaat</p>
+</section>
+
+<!-- Score preview -->
+<div class="score-preview">
+  <div class="preview-card">
+    <div class="preview-label">Voorbeeld analyse — voor en na</div>
+    <div class="preview-scores">
+      <div class="preview-score red">
+        <div class="ps-label">SEO</div>
+        <div class="ps-num">24</div>
+        <div class="ps-bar"><div class="ps-fill" style="width:24%"></div></div>
+        <div class="ps-reason">Belangrijke zoekwoorden ontbreken in titel</div>
+      </div>
+      <div class="preview-score amber">
+        <div class="ps-label">Conversie</div>
+        <div class="ps-num">31</div>
+        <div class="ps-bar"><div class="ps-fill" style="width:31%"></div></div>
+        <div class="ps-reason">Bullets beschrijven specs, geen voordelen</div>
+      </div>
+      <div class="preview-score amber">
+        <div class="ps-label">Helderheid</div>
+        <div class="ps-num">45</div>
+        <div class="ps-bar"><div class="ps-fill" style="width:45%"></div></div>
+        <div class="ps-reason">Beschrijving mist concrete gebruikssituaties</div>
+      </div>
+    </div>
+    <div class="preview-arrow">↓</div>
+    <div class="preview-result">
+      <div class="preview-result-label">Na optimalisatie met ProListing</div>
+      <div class="preview-result-text">Gemiddelde score stijgt van 33 naar 74 · Titel geoptimaliseerd voor bol.com zoekalgoritme · Bullets herschreven naar klantvoordelen · Ontbrekende specs geïdentificeerd</div>
+    </div>
+  </div>
+</div>
+
+<!-- Features -->
+<section class="features" id="functies">
+  <div class="section-inner">
+    <div class="section-label">Functies</div>
+    <h2 class="section-title">Alles wat je nodig hebt</h2>
+    <p class="section-sub">ProListing combineert diepgaande analyse met direct bruikbare verbeteringen.</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">&#9998;</div>
+        <div class="feature-title">Listing analyse</div>
+        <div class="feature-desc">Plak je bestaande title, bullets en beschrijving. Je krijgt scores voor SEO, conversie en helderheid met concrete verbeterpunten.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#8679;</div>
+        <div class="feature-title">Listing genereren</div>
+        <div class="feature-desc">Upload de producthandleiding als PDF. ProListing leest alle specs en genereert een volledige listing — ideaal voor nieuwe producten.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#10003;</div>
+        <div class="feature-title">Geen hallucinaties</div>
+        <div class="feature-desc">De tool verzint nooit specs of kenmerken. Ontbrekende informatie wordt duidelijk aangegeven zodat jij het kunt aanvullen.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#9733;</div>
+        <div class="feature-title">Scores en prioriteiten</div>
+        <div class="feature-desc">Elke analyse geeft een duidelijke score van 0-100 per categorie. Je ziet direct wat de grootste kansen zijn.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#128190;</div>
+        <div class="feature-title">Analyse geschiedenis</div>
+        <div class="feature-desc">Al je analyses worden automatisch bewaard. Bekijk eerdere resultaten terug en zie hoe je listings verbeteren over tijd.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#128196;</div>
+        <div class="feature-title">Actiepakket download</div>
+        <div class="feature-desc">Download een professioneel PDF-rapport met scores, verbeterde teksten en een afvinklijst van ontbrekende informatie.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How it works -->
+<section class="how" id="hoe-het-werkt">
+  <div class="section-inner">
+    <div class="section-label">Werkwijze</div>
+    <h2 class="section-title">In drie stappen</h2>
+    <p class="section-sub">Van ruwe listing naar geoptimaliseerde tekst in minder dan een minuut.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-title">Listing invoeren</div>
+        <div class="step-desc">Plak je huidige titel, bullets en beschrijving — of upload een producthandleiding als PDF voor nieuwe producten.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-title">Analyse ontvangen</div>
+        <div class="step-desc">ProListing analyseert je listing op SEO, conversie en helderheid. Je ziet scores, prioriteiten en ontbrekende informatie.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-title">Direct toepassen</div>
+        <div class="step-desc">Kopieer de verbeterde titel, bullets en beschrijving met één klik en plak ze in je bol.com verkopersaccount.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Pricing -->
+<section class="pricing" id="prijzen">
+  <div class="section-inner">
+    <div class="section-label">Prijzen</div>
+    <h2 class="section-title">Eerlijk en transparant</h2>
+    <p class="section-sub">Start gratis. Upgrade wanneer je meer analyses nodig hebt.</p>
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <div class="pricing-name">Gratis</div>
+        <div class="pricing-price">€0 <span>/altijd</span></div>
+        <div class="pricing-limit">1 analyse om te starten</div>
+        <ul class="pricing-features">
+          <li><span class="check">✓</span>1 volledige listing analyse</li>
+          <li><span class="check">✓</span>SEO, conversie en helderheid score</li>
+          <li><span class="check">✓</span>Verbeterde titel, bullets en beschrijving</li>
+          <li><span class="check">✓</span>Geen creditcard vereist</li>
+        </ul>
+        <a href="/tool" class="pricing-btn outline">Gratis starten</a>
+      </div>
+      <div class="pricing-card featured">
+        <div class="pricing-badge">Meest gekozen</div>
+        <div class="pricing-name">Starter</div>
+        <div class="pricing-price">€19 <span>/maand</span></div>
+        <div class="pricing-limit">15 analyses per maand</div>
+        <ul class="pricing-features">
+          <li><span class="check">✓</span>15 analyses per maand</li>
+          <li><span class="check">✓</span>PDF handleiding uploaden</li>
+          <li><span class="check">✓</span>Analyse geschiedenis</li>
+          <li><span class="check">✓</span>Actiepakket PDF download</li>
+          <li><span class="check">✓</span>Listing updaten met ontbrekende specs</li>
+        </ul>
+        <a href="/tool" class="pricing-btn">Starten met Starter</a>
+      </div>
+      <div class="pricing-card">
+        <div class="pricing-name">Pro</div>
+        <div class="pricing-price">€49 <span>/maand</span></div>
+        <div class="pricing-limit">Onbeperkt analyses</div>
+        <ul class="pricing-features">
+          <li><span class="check">✓</span>Onbeperkt analyses</li>
+          <li><span class="check">✓</span>Alles van Starter</li>
+          <li><span class="check">✓</span>Ideaal voor grote catalogi</li>
+          <li><span class="check">✓</span>Nooit een limiet</li>
+        </ul>
+        <a href="/tool" class="pricing-btn outline">Starten met Pro</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- About -->
+<section class="about" id="over">
+  <div class="about-inner">
+    <div class="section-label">Verhaal</div>
+    <h2>Waarom ProListing?</h2>
+    <p>Als bol.com verkoper merkte ik hoeveel tijd er verloren gaat aan het schrijven en optimaliseren van productlistings. Elke keer opnieuw dezelfde vragen: is mijn titel goed genoeg? Gebruik ik de juiste zoekwoorden? Waarom converteert dit product niet?</p>
+    <p>ChatGPT hielp even, maar verzint specs die niet kloppen, geeft geen scores en weet niets van hoe bol.com's zoekalgoritme werkt. Ik wilde een tool die specifiek voor bol.com verkopers gebouwd is — eerlijk, betrouwbaar en direct bruikbaar.</p>
+    <p>Dat is ProListing geworden. Gebouwd door een verkoper, voor verkopers.</p>
+    <div class="about-sig">
+      <div class="about-avatar">MV</div>
+      <div>
+        <div class="about-name">Marvin van Dongen</div>
+        <div class="about-title">Oprichter ProListing · bol.com verkoper</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+  <h2>Klaar om je listings te verbeteren?</h2>
+  <p>Start gratis — geen creditcard nodig. Je eerste analyse is binnen 60 seconden klaar.</p>
+  <a href="/tool" class="btn-primary">Gratis analyse starten</a>
+  <p class="cta-note">Al meer dan de moeite waard na één analyse.</p>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand">
+        <div class="footer-logo"><svg viewBox="0 0 16 16"><path d="M8 1L10.5 6H14L10.5 9.5L12 14L8 11L4 14L5.5 9.5L2 6H5.5Z"/></svg></div>
+        <span class="footer-name">ProListing</span>
+      </div>
+      <div class="footer-copy">© 2026 ProListing · Marvin van Dongen</div>
+    </div>
+    <div class="footer-links">
+      <a href="landing.html">Home</a>
+      <a href="#prijzen">Prijzen</a>
+      <a href="over.html">Over</a>
+      <a href="contact.html">Contact</a>
+      <a href="voorwaarden.html">Algemene voorwaarden</a>
+      <a href="privacy.html">Privacybeleid</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
