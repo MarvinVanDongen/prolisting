@@ -54,6 +54,9 @@ async function initDB() {
   await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS verified BOOLEAN DEFAULT FALSE`);
   await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_token VARCHAR(255)`);
   await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_expires TIMESTAMP`);
+  await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token VARCHAR(255)`);
+  await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_expires TIMESTAMP`);
+  await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS first_login BOOLEAN DEFAULT TRUE`);
   console.log("Database klaar");
 }
 
@@ -91,6 +94,54 @@ async function sendVerificationEmail(email, token) {
         <p style="color:#5c5b56;margin-bottom:24px;line-height:1.6">Klik op de knop hieronder om je e-mailadres te bevestigen en je gratis analyse te starten.</p>
         <a href="${verifyUrl}" style="display:inline-block;background:#1a1a18;color:#ffffff;text-decoration:none;border-radius:10px;padding:12px 28px;font-size:14px;font-weight:500">E-mailadres bevestigen</a>
         <p style="color:#9c9a92;font-size:12px;margin-top:32px;line-height:1.5">Deze link is 24 uur geldig.<br>Heb je je niet aangemeld bij ListingPro? Dan kun je deze e-mail negeren.</p>
+      </div>
+    `
+  });
+}
+
+async function sendPasswordResetEmail(email, token) {
+  const resetUrl = APP_URL + "/reset-password.html?token=" + token;
+  if (!resend) {
+    console.log("\n=== WACHTWOORD RESET LINK ===");
+    console.log(resetUrl);
+    console.log("=============================\n");
+    return;
+  }
+  await resend.emails.send({
+    from: FROM_EMAIL,
+    to: email,
+    subject: "Wachtwoord resetten — ProListing",
+    html: `
+      <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:480px;margin:0 auto;padding:40px 24px;background:#fff">
+        <div style="margin-bottom:24px"><span style="font-size:16px;font-weight:600">ProListing</span></div>
+        <h2 style="font-size:20px;font-weight:600;margin-bottom:8px;color:#1a1a18">Wachtwoord resetten</h2>
+        <p style="color:#5c5b56;margin-bottom:24px;line-height:1.6">Je hebt een wachtwoordreset aangevraagd. Klik op de knop hieronder om een nieuw wachtwoord in te stellen.</p>
+        <a href="${resetUrl}" style="display:inline-block;background:#1a1a18;color:#ffffff;text-decoration:none;border-radius:10px;padding:12px 28px;font-size:14px;font-weight:500">Nieuw wachtwoord instellen</a>
+        <p style="color:#9c9a92;font-size:12px;margin-top:32px;line-height:1.5">Deze link is 1 uur geldig.<br>Heb je geen reset aangevraagd? Dan kun je deze e-mail negeren.</p>
+      </div>
+    `
+  });
+}
+
+async function sendWelcomeEmail(email) {
+  if (!resend) return;
+  await resend.emails.send({
+    from: FROM_EMAIL,
+    to: email,
+    subject: "Welkom bij ProListing — zo haal je het meeste eruit",
+    html: `
+      <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:480px;margin:0 auto;padding:40px 24px;background:#fff">
+        <div style="margin-bottom:24px"><span style="font-size:16px;font-weight:600">ProListing</span></div>
+        <h2 style="font-size:20px;font-weight:600;margin-bottom:8px;color:#1a1a18">Welkom bij ProListing!</h2>
+        <p style="color:#5c5b56;margin-bottom:16px;line-height:1.6">Je account is geactiveerd. Je hebt 1 gratis analyse om de tool te proberen.</p>
+        <p style="color:#5c5b56;margin-bottom:8px;font-weight:500">Zo haal je het meeste uit je eerste analyse:</p>
+        <ul style="color:#5c5b56;margin-bottom:24px;padding-left:20px;line-height:1.8">
+          <li>Plak je volledige bestaande titel, bullets én beschrijving in</li>
+          <li>Hoe meer informatie je geeft, hoe beter de output</li>
+          <li>Vul ontbrekende specs in via de invulvelden na de analyse</li>
+        </ul>
+        <a href="${APP_URL}/tool" style="display:inline-block;background:#1a1a18;color:#ffffff;text-decoration:none;border-radius:10px;padding:12px 28px;font-size:14px;font-weight:500">Start je eerste analyse</a>
+        <p style="color:#9c9a92;font-size:12px;margin-top:32px">Vragen? Mail naar info@prolisting.nl</p>
       </div>
     `
   });
@@ -311,6 +362,86 @@ app.post("/api/stripe/webhook", async (req, res) => {
     console.error("Webhook fout:", err.message);
   }
   res.json({ received: true });
+});
+
+// ── Password reset routes ────────────────────────────────────────
+app.post("/api/auth/forgot-password", async (req, res) => {
+  const { email } = req.body || {};
+  if (!email) return res.status(400).json({ error: "E-mailadres vereist" });
+  try {
+    const { rows } = await pool.query("SELECT * FROM users WHERE email = $1", [email.toLowerCase().trim()]);
+    // Always return success to prevent email enumeration
+    if (rows[0]) {
+      const token = crypto.randomBytes(32).toString("hex");
+      const expires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+      await pool.query("UPDATE users SET reset_token = $1, reset_expires = $2 WHERE id = $3", [token, expires, rows[0].id]);
+      try { await sendPasswordResetEmail(email, token); } catch(e) { console.error("Reset email fout:", e.message); }
+    }
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: "Fout bij verwerken verzoek" });
+  }
+});
+
+app.post("/api/auth/reset-password", async (req, res) => {
+  const { token, password } = req.body || {};
+  if (!token || !password || password.length < 8) {
+    return res.status(400).json({ error: "Ongeldig verzoek of wachtwoord te kort" });
+  }
+  try {
+    const { rows } = await pool.query(
+      "SELECT * FROM users WHERE reset_token = $1 AND reset_expires > NOW()", [token]
+    );
+    if (!rows[0]) return res.status(400).json({ error: "Link is verlopen of ongeldig" });
+    const hash = await bcrypt.hash(password, 10);
+    await pool.query("UPDATE users SET password_hash = $1, reset_token = NULL, reset_expires = NULL WHERE id = $2", [hash, rows[0].id]);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: "Fout bij opslaan wachtwoord" });
+  }
+});
+
+// ── Account route ─────────────────────────────────────────────────
+app.get("/api/account", requireAuth, async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      "SELECT id, email, tier, analyses_used, analyses_limit, verified, billing_period_start, created_at FROM users WHERE id = $1",
+      [req.user.id]
+    );
+    if (!rows[0]) return res.status(404).json({ error: "Niet gevonden" });
+    res.json(rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/account/cancel", requireAuth, async (req, res) => {
+  try {
+    const { rows } = await pool.query("SELECT * FROM users WHERE id = $1", [req.user.id]);
+    const user = rows[0];
+    if (!user) return res.status(404).json({ error: "Niet gevonden" });
+    if (user.stripe_subscription_id && stripeClient) {
+      await stripeClient.subscriptions.update(user.stripe_subscription_id, { cancel_at_period_end: true });
+    }
+    res.json({ ok: true, message: "Abonnement wordt opgezegd aan het einde van de betaalperiode" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Send welcome email on first verified login
+app.post("/api/auth/welcome", requireAuth, async (req, res) => {
+  try {
+    const { rows } = await pool.query("SELECT * FROM users WHERE id = $1", [req.user.id]);
+    const user = rows[0];
+    if (user && user.first_login && user.verified) {
+      await pool.query("UPDATE users SET first_login = FALSE WHERE id = $1", [user.id]);
+      try { await sendWelcomeEmail(user.email); } catch(e) {}
+    }
+    res.json({ ok: true });
+  } catch (err) {
+    res.json({ ok: true });
+  }
 });
 
 // ── Analyze route ─────────────────────────────────────────────────

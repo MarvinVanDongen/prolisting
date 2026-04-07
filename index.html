@@ -218,6 +218,7 @@ input.over-limit{border-color:var(--red)!important}
     <span id="usage-display" class="usage-pill"></span>
     <span id="user-email-display"></span>
     <button id="upgrade-header-btn" class="btn btn-sm" onclick="showUpgrade()" style="display:none">Upgraden</button>
+    <a href="/account.html" class="btn-ghost btn-sm" style="text-decoration:none">Mijn account</a>
     <button class="btn-ghost btn-sm" onclick="doLogout()">Uitloggen</button>
   </div>
 </header>
@@ -247,6 +248,7 @@ input.over-limit{border-color:var(--red)!important}
           <input type="password" id="login-password" placeholder="Wachtwoord" onkeydown="if(event.key==='Enter')doLogin()">
         </div>
         <button class="btn" style="width:100%;justify-content:center" onclick="doLogin()" id="login-btn">Inloggen</button>
+        <div style="text-align:center;margin-top:12px"><a href="/reset-password.html" style="font-size:12px;color:var(--text3);text-decoration:underline">Wachtwoord vergeten?</a></div>
       </div>
       <div id="form-register-auth" style="display:none">
         <div class="auth-free-badge">

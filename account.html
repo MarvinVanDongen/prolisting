@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mijn account — ProListing</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#ffffff;--bg2:#f7f6f3;--bg3:#eeede8;--text:#1a1a18;--text2:#5c5b56;--text3:#9c9a92;--border:rgba(0,0,0,0.1);--border2:rgba(0,0,0,0.2);--green:#0F6E56;--green-bg:#E1F5EE;--green-text:#085041;--amber:#854F0B;--amber-bg:#FAEEDA;--amber-text:#633806;--red:#A32D2D;--red-bg:#FCEBEB;--red-text:#791F1F;--radius:10px;--radius-lg:14px}
+@media(prefers-color-scheme:dark){:root{--bg:#1c1c1a;--bg2:#252522;--bg3:#2e2e2b;--text:#e8e6de;--text2:#a8a69e;--text3:#6e6c66;--border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.2);--green:#5DCAA5;--green-bg:#042820;--green-text:#9FE1CB;--amber:#EF9F27;--amber-bg:#2a1e06;--amber-text:#FAC775;--red:#F09595;--red-bg:#2a0e0e;--red-text:#F7C1C1}}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.6}
+nav{border-bottom:0.5px solid var(--border);padding:14px 24px;display:flex;align-items:center;gap:10px}
+.logo{width:26px;height:26px;background:var(--text);border-radius:7px;display:flex;align-items:center;justify-content:center}
+.logo svg{width:14px;height:14px;fill:var(--bg)}
+.logo-text{font-size:15px;font-weight:500}
+.nav-links{margin-left:auto;display:flex;gap:10px;align-items:center}
+.btn-nav{background:var(--text);color:var(--bg);border:none;border-radius:var(--radius);padding:7px 16px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-block}
+.btn-ghost-sm{background:none;border:0.5px solid var(--border2);border-radius:var(--radius);padding:7px 16px;font-size:12px;color:var(--text2);cursor:pointer;font-family:inherit;text-decoration:none;display:inline-block}
+main{max-width:640px;margin:0 auto;padding:48px 24px 80px}
+h1{font-size:22px;font-weight:500;margin-bottom:4px}
+.page-sub{font-size:14px;color:var(--text2);margin-bottom:32px}
+.section{margin-bottom:28px}
+.section-label{font-size:11px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
+.card{background:var(--bg);border:0.5px solid var(--border2);border-radius:var(--radius-lg);padding:20px}
+.plan-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;gap:12px}
+.plan-name{font-size:16px;font-weight:500;margin-bottom:2px}
+.plan-price{font-size:13px;color:var(--text2)}
+.plan-badge{font-size:12px;font-weight:500;padding:3px 10px;border-radius:20px}
+.badge-free{background:var(--bg2);color:var(--text2)}
+.badge-starter{background:var(--amber-bg);color:var(--amber-text)}
+.badge-pro{background:var(--green-bg);color:var(--green-text)}
+.usage-bar-wrap{background:var(--bg2);border-radius:4px;height:6px;margin-bottom:6px;overflow:hidden}
+.usage-bar-fill{height:100%;border-radius:4px;transition:width .6s ease;background:var(--text)}
+.usage-bar-fill.low{background:var(--amber)}
+.usage-bar-fill.full{background:var(--red)}
+.usage-label{font-size:13px;color:var(--text2)}
+.divider{height:0.5px;background:var(--border);margin:16px 0}
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid var(--border);font-size:13px}
+.info-row:last-child{border-bottom:none}
+.info-label{color:var(--text2)}
+.info-value{font-weight:500;color:var(--text)}
+.btn-primary{background:var(--text);color:var(--bg);border:none;border-radius:var(--radius);padding:10px 24px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:opacity .15s;text-decoration:none;display:inline-block}
+.btn-primary:hover{opacity:.85}
+.btn-danger{background:none;color:var(--red);border:0.5px solid var(--red);border-radius:var(--radius);padding:9px 20px;font-size:13px;cursor:pointer;font-family:inherit;transition:all .15s}
+.btn-danger:hover{background:var(--red-bg)}
+.upgrade-card{background:var(--text);border-radius:var(--radius-lg);padding:20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.upgrade-text{color:rgba(255,255,255,0.7);font-size:13px;margin-top:3px}
+.upgrade-title{color:#fff;font-size:15px;font-weight:500}
+.btn-upgrade{background:#fff;color:var(--text);border:none;border-radius:var(--radius);padding:9px 20px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;white-space:nowrap}
+.msg{border-radius:var(--radius);padding:12px 14px;font-size:13px;margin-bottom:16px;display:none}
+.msg.success{background:var(--green-bg);color:var(--green-text)}
+.msg.error{background:var(--red-bg);color:var(--red-text)}
+#loading-state{text-align:center;padding:60px 0;color:var(--text3);font-size:14px}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo"><svg viewBox="0 0 16 16"><path d="M8 1L10.5 6H14L10.5 9.5L12 14L8 11L4 14L5.5 9.5L2 6H5.5Z"/></svg></div>
+  <span class="logo-text">ProListing</span>
+  <div class="nav-links">
+    <a href="/tool" class="btn-nav">Naar de tool</a>
+    <button class="btn-ghost-sm" onclick="doLogout()">Uitloggen</button>
+  </div>
+</nav>
+
+<main>
+  <div id="loading-state">Gegevens laden...</div>
+  <div id="account-content" style="display:none">
+    <h1>Mijn account</h1>
+    <p class="page-sub" id="account-email"></p>
+
+    <div id="msg" class="msg"></div>
+
+    <!-- Plan & usage -->
+    <div class="section">
+      <div class="section-label">Abonnement</div>
+      <div class="card">
+        <div class="plan-header">
+          <div>
+            <div class="plan-name" id="plan-name">—</div>
+            <div class="plan-price" id="plan-price">—</div>
+          </div>
+          <span class="plan-badge" id="plan-badge">—</span>
+        </div>
+        <div id="usage-section">
+          <div class="usage-bar-wrap"><div class="usage-bar-fill" id="usage-bar" style="width:0%"></div></div>
+          <div class="usage-label" id="usage-label">—</div>
+        </div>
+        <div id="reset-info" style="font-size:12px;color:var(--text3);margin-top:8px;display:none"></div>
+      </div>
+    </div>
+
+    <!-- Upgrade (only for non-pro) -->
+    <div class="section" id="upgrade-section" style="display:none">
+      <div class="upgrade-card">
+        <div>
+          <div class="upgrade-title">Upgrade naar Pro</div>
+          <div class="upgrade-text">Onbeperkt analyses · Nooit een limiet · €49/maand</div>
+        </div>
+        <button class="btn-upgrade" onclick="startCheckout('pro')">Upgraden</button>
+      </div>
+    </div>
+
+    <!-- Account info -->
+    <div class="section">
+      <div class="section-label">Accountgegevens</div>
+      <div class="card">
+        <div class="info-row">
+          <span class="info-label">E-mailadres</span>
+          <span class="info-value" id="info-email">—</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Lid sinds</span>
+          <span class="info-value" id="info-since">—</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Status</span>
+          <span class="info-value" id="info-verified">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Danger zone -->
+    <div class="section" id="cancel-section" style="display:none">
+      <div class="section-label">Abonnement beheren</div>
+      <div class="card">
+        <p style="font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.5">Je kunt je abonnement opzeggen. Je behoudt dan toegang tot het einde van de betaalperiode, waarna je terugvalt op het gratis plan.</p>
+        <button class="btn-danger" onclick="cancelSubscription()">Abonnement opzeggen</button>
+      </div>
+    </div>
+
+    <!-- Support -->
+    <div class="section">
+      <div class="section-label">Support</div>
+      <div class="card">
+        <p style="font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.5">Vragen over je abonnement of factuur? Neem contact op:</p>
+        <a href="mailto:info@prolisting.nl" style="font-size:13px;color:var(--text);font-weight:500">info@prolisting.nl</a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+var authToken = localStorage.getItem('lp_token');
+
+if (!authToken) {
+  window.location.href = '/tool';
+}
+
+function doLogout() {
+  localStorage.removeItem('lp_token');
+  window.location.href = '/tool';
+}
+
+function showMsg(type, text) {
+  var el = document.getElementById('msg');
+  el.textContent = text; el.className = 'msg ' + type; el.style.display = 'block';
+  setTimeout(function() { el.style.display = 'none'; }, 5000);
+}
+
+fetch('/api/account', { headers: { 'Authorization': 'Bearer ' + authToken } })
+  .then(function(r) {
+    if (r.status === 401) { window.location.href = '/tool'; return; }
+    return r.json();
+  })
+  .then(function(user) {
+    if (!user || user.error) { window.location.href = '/tool'; return; }
+
+    document.getElementById('loading-state').style.display = 'none';
+    document.getElementById('account-content').style.display = 'block';
+
+    document.getElementById('account-email').textContent = user.email;
+    document.getElementById('info-email').textContent = user.email;
+    document.getElementById('info-verified').textContent = user.verified ? 'Geverifieerd' : 'Niet geverifieerd';
+    document.getElementById('info-since').textContent = new Date(user.created_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+
+    // Plan info
+    var tier = user.tier || 'free';
+    var planNames = { free: 'Gratis', starter: 'Starter', pro: 'Pro' };
+    var planPrices = { free: 'Gratis voor altijd', starter: '€19 per maand', pro: '€49 per maand' };
+    var badgeClasses = { free: 'badge-free', starter: 'badge-starter', pro: 'badge-pro' };
+
+    document.getElementById('plan-name').textContent = planNames[tier] || tier;
+    document.getElementById('plan-price').textContent = planPrices[tier] || '';
+    var badge = document.getElementById('plan-badge');
+    badge.textContent = planNames[tier] || tier;
+    badge.className = 'plan-badge ' + (badgeClasses[tier] || 'badge-free');
+
+    // Usage bar
+    var used = user.analyses_used || 0;
+    var limit = user.analyses_limit || 1;
+    var pct = tier === 'pro' ? 0 : Math.min(100, Math.round((used / limit) * 100));
+
+    if (tier === 'pro') {
+      document.getElementById('usage-section').style.display = 'none';
+      document.getElementById('account-content').querySelector('.plan-name').textContent += ' — Onbeperkt';
+    } else {
+      var bar = document.getElementById('usage-bar');
+      bar.style.width = pct + '%';
+      if (pct >= 100) bar.className = 'usage-bar-fill full';
+      else if (pct >= 70) bar.className = 'usage-bar-fill low';
+      var remaining = Math.max(0, limit - used);
+      document.getElementById('usage-label').textContent = used + ' van ' + limit + ' analyses gebruikt · ' + remaining + ' resterend';
+    }
+
+    // Reset date for starter
+    if (tier === 'starter' && user.billing_period_start) {
+      var reset = new Date(user.billing_period_start);
+      reset.setMonth(reset.getMonth() + 1);
+      document.getElementById('reset-info').textContent = 'Teller reset op ' + reset.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' });
+      document.getElementById('reset-info').style.display = 'block';
+    }
+
+    // Upgrade section
+    if (tier !== 'pro') {
+      document.getElementById('upgrade-section').style.display = 'block';
+    }
+
+    // Cancel section
+    if (tier === 'starter' || tier === 'pro') {
+      document.getElementById('cancel-section').style.display = 'block';
+    }
+  })
+  .catch(function() { window.location.href = '/tool'; });
+
+function startCheckout(plan) {
+  fetch('/api/stripe/create-checkout', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken },
+    body: JSON.stringify({ plan: plan })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.url) window.location.href = data.url;
+    else showMsg('error', data.error || 'Fout bij aanmaken betaalsessie');
+  })
+  .catch(function() { showMsg('error', 'Verbindingsfout, probeer opnieuw'); });
+}
+
+function cancelSubscription() {
+  if (!confirm('Weet je zeker dat je je abonnement wil opzeggen? Je behoudt toegang tot het einde van de betaalperiode.')) return;
+  fetch('/api/account/cancel', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken }
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.error) { showMsg('error', data.error); return; }
+    showMsg('success', 'Je abonnement wordt opgezegd aan het einde van de betaalperiode. Je ontvangt een bevestigingsmail.');
+    document.getElementById('cancel-section').style.display = 'none';
+  })
+  .catch(function() { showMsg('error', 'Fout bij opzeggen, mail naar info@prolisting.nl'); });
+}
+</script>
+</body>
+</html>
